@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Library System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Background Collage Elements -->
+    <div class="collage-bg">
+
+        <img src="img/statue.png" class="collage-item collage-statue" alt="Vintage Statue">
+        <img src="img/hands.png" class="collage-item collage-hands" alt="Creation of Adam Hands">
+        <img src="img/butterfly.png" class="collage-item collage-butterfly" alt="Vintage Butterfly">
+
+
+    </div>
+
+    <header class="library-header">
+        <!-- Top row: back button (left) and cart (right) -->
+        <div class="header-top" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <a href="index.html" class="back-btn">&#x21A4; Return to Hall</a>
+            <button id="cartBtn" class="cart-btn" aria-label="View reservations">
+                <span class="cart-icon">🛒</span>
+                <span id="cartCount" class="cart-count">0</span>
+            </button>
+        </div>
+
+        <!-- Title centered on its own row for better wrapping on narrow screens -->
+        <div class="header-title" style="text-align:center;margin:10px 0;">
+            <h1>The Book Catalog</h1>
+        </div>
+
+        <!-- Search row: stacked controls that become full-width on phones -->
+        <div class="header-search">
+            <div class="search-controls" style="display:flex;gap:12px;align-items:center;">
+                <select id="genreSelect" aria-label="Select genre">
+                    <option value="All">All Genres</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="Search by Title">
+            </div>
+
+            <!-- keep cart panel but move it here so it overlays near the cart button -->
+            <div id="cartPanel" class="cart-panel" aria-hidden="true">
+                <div class="cart-list" id="cartList"></div>
+                <div class="cart-footer">
+                    <button id="closeCart" class="btn-cancel">Close</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="stats">
+        <span id="totalBooks"></span>
+        <span id="reservedCount"></span>
+    </div>
+
+    <div class="admin-add">
+        <details>
+            <summary>Add a New Book</summary>
+            <form id="addBookForm" class="add-book-form">
+                <input type="text" id="newTitle" placeholder="Title" required>
+                <input type="text" id="newAuthor" placeholder="Author" required>
+                <select id="newGenre" required>
+                    <option value="">Select genre</option>
+                </select>
+                <input type="number" id="newStock" placeholder="Stock" min="0" value="1" required>
+                <input type="text" id="newImage" placeholder="Image URL (optional)">
+                <button type="submit">Add Book</button>
+            </form>
+        </details>
+    </div>
+
+    <div id="bookContainer"></div>
+    <div id="pagination"></div>
+
+    <!-- Reservation modal -->
+    <div id="reserveModal" class="modal" hidden aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="reserveTitle">
+            <h3 id="reserveTitle">Reserve Book</h3>
+            <p id="reserveBookName">Select how many days to reserve this book (max 15 days):</p>
+            <label class="field">
+                <select id="reserveDays">
+                    <!-- options populated by JS -->
+                </select>
+            </label>
+            <div class="form-actions modal-actions">
+                <button type="button" id="confirmReserve" class="btn-add">Confirm</button>
+                <button type="button" id="cancelReserve" class="btn-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current reservations (UI only) -->
+    <section id="reservationsPanel" class="reservations-panel">
+        <h2>Current Reservations</h2>
+        <div id="reservationsList">No reservations yet.</div>
+    </section>
+
+    <!-- Confirmation modal (in-page, replaces browser confirm) -->
+    <div id="confirmModal" class="modal" hidden aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-panel confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <h3 id="confirmTitle">Please confirm</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="form-actions modal-actions">
+                <button type="button" id="confirmYes" class="btn-add">Yes</button>
+                <button type="button" id="confirmNo" class="btn-cancel">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+</body>
+
+</html>

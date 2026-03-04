@@ -1,0 +1,1047 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Courier+Prime&display=swap');
+
+/* ===== VARIABLES & AESTHETIC ===== */
+:root {
+    --bg-dark: #12100e;
+    --bg-paper: #2a241f;
+    --bg-parchment: #e8dcca;
+    --text-primary: #d4c5b0;
+    --text-secondary: #a39178;
+    --text-dark: #2c241b;
+    --accent-gold: #c5a059;
+    --accent-gold-hover: #e0bb75;
+    --accent-crimson: #6b2d28;
+    --accent-crimson-hover: #863a34;
+
+    --font-heading: 'Cinzel', serif;
+    --font-body: 'Cormorant Garamond', serif;
+    --font-mono: 'Courier Prime', monospace;
+
+    --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.8);
+    --shadow-inset: inset 0 0 50px rgba(0, 0, 0, 0.7);
+    --border-ornate: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+/* Base Texture */
+body {
+    margin: 0;
+    font-size: x-large;
+    font-weight: 900;
+    font-family: var(--font-body);
+    background-color: var(--bg-dark);
+    /* SVG Noise Texture for the background */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"),
+        radial-gradient(circle at center, #24201c 0%, #0d0b0a 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-heading);
+    color: var(--accent-gold);
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+/* ===== COLLAGE AESTHETIC ELEMENTS ===== */
+.collage-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.collage-item {
+    position: absolute;
+    mix-blend-mode: multiply;
+    filter: contrast(1.1) sepia(0.6) opacity(0.6);
+    transition: transform 1s ease-out;
+}
+
+.collage-statue {
+    bottom: -5vh;
+    left: -5vw;
+    width: clamp(200px, 40vw, 450px);
+    transform: rotate(-5deg);
+}
+
+.collage-hands {
+    top: 15vh;
+    right: -10vw;
+    width: clamp(300px, 50vw, 600px);
+    transform: rotate(10deg);
+}
+
+.collage-butterfly {
+    top: 10vh;
+    left: 15vw;
+    width: clamp(150px, 25vw, 300px);
+    transform: rotate(-15deg);
+    opacity: 0.4;
+}
+
+/* Parallax hover effect for collage elements */
+body:hover .collage-statue {
+    transform: rotate(-5deg) translate(5px, -5px);
+}
+
+body:hover .collage-hands {
+    transform: rotate(10deg) translate(-10px, 5px);
+}
+
+body:hover .collage-butterfly {
+    transform: rotate(-12deg) translate(15px, 10px);
+}
+
+/* ===== LANDING PAGE ===== */
+.landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* STICKY NAVBAR */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 60px;
+
+    background: rgba(18, 16, 14, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: var(--border-ornate);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.navbar h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.nav-btn {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    text-decoration: none;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--accent-gold);
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s ease;
+}
+
+.nav-btn:hover {
+    color: var(--bg-dark);
+}
+
+.nav-btn:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* HERO SECTION */
+.hero {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+    position: relative;
+}
+
+/* Vintage Decorative Frame for Hero Content */
+.hero-content {
+    background: rgba(30, 26, 22, 0.7);
+    padding: 60px 80px;
+    border: 2px solid rgba(197, 160, 89, 0.2);
+    border-radius: 4px;
+    box-shadow: var(--shadow-deep);
+    backdrop-filter: blur(5px);
+    position: relative;
+    max-width: 800px;
+    animation: fadeIn 1.5s ease-out;
+}
+
+/* Ornamental Corners */
+.hero-content::before,
+.hero-content::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--accent-gold);
+    opacity: 0.6;
+}
+
+.hero-content::before {
+    top: -10px;
+    left: -10px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.hero-content::after {
+    bottom: -10px;
+    right: -10px;
+    border-left: none;
+    border-top: none;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 14px 40px;
+    background: var(--accent-crimson);
+    color: var(--bg-parchment);
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.cta-btn:hover {
+    background: var(--accent-crimson-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(197, 160, 89, 0.1);
+    background: var(--bg-dark);
+}
+
+/* ===== LIBRARY PAGE ===== */
+
+.library-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(22, 19, 16, 0.95);
+    border-bottom: var(--border-ornate);
+    padding: 25px 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.library-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+.header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-controls select {
+    font-family: var(--font-mono);
+    background: var(--bg-parchment);
+    color: var(--text-dark);
+    padding: 10px 12px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 2px;
+    font-size: 1rem;
+}
+
+.search-wrap { position: relative; }
+
+.suggestions {
+    position: absolute;
+    top: 46px;
+    left: 0;
+    right: 0;
+    background: #fff8eb;
+    color: var(--text-dark);
+    border: 1px solid rgba(0,0,0,0.08);
+    max-height: 220px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 6px 0 0 0;
+    padding: 6px 0;
+    z-index: 2000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.suggestions li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.suggestions li[aria-selected="true"], .suggestions li:hover {
+    background: var(--accent-gold-hover);
+    color: var(--bg-dark);
+}
+
+.suggestions .no-result {
+    color: #6b6b6b;
+    cursor: default;
+}
+
+/* Cart button in header */
+.cart-btn { display:inline-flex; align-items:center; gap:8px; background:transparent; border:none; color:var(--accent-gold); font-size:1rem; cursor:pointer; position:relative; }
+.cart-icon { font-size:1.2rem; }
+.cart-count { position:absolute; top:-6px; right:-8px; background:var(--accent-crimson); color:var(--bg-parchment); padding:2px 6px; border-radius:12px; font-size:0.75rem; }
+
+/* Compact cart dropdown panel */
+.cart-panel { position:absolute; right:20px; top:56px; width:320px; background:#fff8eb; color:var(--text-dark); border:1px solid rgba(0,0,0,0.08); border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index:2500; display:none; }
+.cart-panel.open { display:block; }
+.cart-panel .cart-list { max-height:320px; overflow:auto; padding:8px; display:flex; flex-direction:column; gap:8px; }
+.cart-item { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px; border-radius:6px; }
+.cart-item .meta { flex:1 1 auto; }
+.cart-item .controls { display:flex; gap:6px; align-items:center; }
+.cart-item button { padding:6px 8px; border-radius:4px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; }
+.cart-footer { padding:8px; border-top:1px solid rgba(0,0,0,0.04); display:flex; justify-content:flex-end; gap:8px; }
+
+/* Toast notifications */
+.toast-container { position: fixed; bottom: 18px; right: 18px; z-index: 4000; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: #1f2933; color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.35); opacity: 0; transform: translateY(8px); transition: opacity 220ms ease, transform 220ms ease; min-width: 180px; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: linear-gradient(135deg,#2f855a,#48bb78); }
+.toast.error { background: linear-gradient(135deg,#c53030,#f56565); }
+.toast.info { background: linear-gradient(135deg,#2b6cb0,#4299e1); }
+
+.admin-add {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.add-book-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.add-book-form input,
+.add-book-form select {
+    padding: 10px;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 4px;
+    background: #fff8eb;
+    color: var(--text-dark);
+}
+
+.add-book-form input[type="text"], .add-book-form select {
+    flex: 1 1 200px;
+}
+
+.add-book-form input[type="number"] {
+    width: 120px;
+}
+
+.add-book-form button {
+    padding: 10px 18px;
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+    border: none;
+    cursor: pointer;
+}
+
+/* Styled details/summary for the add form */
+.add-details {
+    max-width: 900px;
+    margin: 8px auto;
+    border: 1px solid rgba(197,160,89,0.12);
+    background: rgba(30,26,22,0.35);
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.add-summary {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    color: var(--accent-gold);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.add-book-form .form-row { width: 100%; display:flex; gap:12px; }
+.add-book-form .field { flex:1 1 0; display:flex; flex-direction:column; }
+.label-text { font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px; }
+
+.image-field { max-width: 420px; }
+.image-preview { width: 160px; height: 220px; border:1px solid rgba(0,0,0,0.08); background:#fff8eb; display:flex; align-items:center; justify-content:center; border-radius:4px; padding:6px; }
+.image-preview img { max-width:100%; max-height:100%; object-fit:cover; }
+
+.help-text { font-size:0.8rem; color:rgba(255,255,255,0.7); margin-top:6px; }
+
+.form-actions { display:flex; gap:10px; margin-top:12px; }
+.btn-add { background: var(--accent-crimson); color: var(--bg-parchment); border: 1px solid rgba(255,255,255,0.06); padding:10px 18px; }
+.btn-cancel { background: transparent; color: var(--text-secondary); border: 1px solid rgba(197,160,89,0.08); padding:10px 18px; }
+
+@media (max-width: 640px) {
+    .add-book-form .form-row { flex-direction:column; }
+    .image-preview { width: 100%; height: 200px; }
+}
+
+/* Typewriter style input */
+.library-header input {
+    font-family: var(--font-mono);
+    background: var(--bg-parchment);
+    color: var(--text-dark);
+    padding: 12px 20px;
+    width: auto;
+    max-width: 720px;
+    flex: 1 1 auto;
+    border: 2px solid var(--text-secondary);
+    border-radius: 2px;
+    font-size: 1rem;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.library-header input:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.4), inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent-gold);
+}
+
+.library-header input::placeholder {
+    color: rgba(44, 36, 27, 0.6);
+}
+
+.back-btn {
+    font-family: var(--font-mono);
+    display: inline-block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+    color: var(--accent-gold);
+}
+
+#stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 20px;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(30, 26, 22, 0.5);
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid rgba(197, 160, 89, 0.2);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#bookContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 40px;
+    padding: 20px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Book Card as an Old Polaroid/Parchment */
+.book-card {
+    background-color: #f7eedf;
+    /* Aged paper color */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    padding: 15px 15px 25px 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(139, 115, 85, 0.2);
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #dcd0bc;
+}
+
+/* Torn paper edge effect at the bottom */
+.book-card::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: repeating-linear-gradient(45deg, transparent, transparent 4px, #e8dcca 4px, #e8dcca 8px);
+    opacity: 0.5;
+}
+
+.book-card:hover {
+    transform: translateY(-10px) rotate(-1deg) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(139, 115, 85, 0.1);
+    z-index: 10;
+}
+
+/* Sepia tone image */
+.book-card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    filter: sepia(0.4) contrast(1.1) brightness(0.9);
+    transition: filter 0.5s ease;
+    background: #2a241f;
+}
+
+.book-card:hover img {
+    filter: sepia(0) contrast(1.1) brightness(1);
+}
+
+.book-content {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--text-dark);
+}
+
+.book-content h3 {
+    font-family: var(--font-heading);
+    color: #1a1512;
+    font-size: 1.3rem;
+    margin: 10px 0 5px 0;
+    line-height: 1.3;
+}
+
+.book-content p {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    margin: 0;
+    font-style: italic;
+    color: #4a3c2e;
+}
+
+/* Stock status as a stamped label */
+.book-content p.stock-status {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-style: normal;
+    text-transform: uppercase;
+    margin: 15px auto;
+    padding: 4px 8px;
+    border: 1px dashed rgba(0, 0, 0, 0.3);
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.low-stock {
+    color: #a85923 !important;
+    border-color: #a85923 !important;
+}
+
+.unavailable {
+    color: #8a2a24 !important;
+    border-color: #8a2a24 !important;
+    text-decoration: line-through;
+}
+
+/* Wax seal / Typewriter key button */
+button.reserve-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: var(--accent-crimson);
+    color: #f7eedf;
+    border: 1px solid #4a1914;
+    cursor: pointer;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.2), 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button.reserve-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.1));
+}
+
+button.reserve-btn:hover {
+    background: var(--accent-crimson-hover);
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+button.reserve-btn:active {
+    transform: translateY(4px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+button.reserve-btn:disabled {
+    background: #6e645a;
+    color: #b5ac9d;
+    cursor: not-allowed;
+    border-color: #4a433c;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Pagination styles - like index cards */
+#pagination {
+    text-align: center;
+    padding: 40px;
+    margin-bottom: 30px;
+}
+
+#pagination button {
+    font-family: var(--font-mono);
+    padding: 8px 16px;
+    margin: 0 5px;
+    background: var(--bg-parchment);
+    color: var(--text-dark);
+    border: 1px solid #b5ac9d;
+    cursor: pointer;
+    font-size: 1.1rem;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+#pagination button:hover {
+    background: #fff8eb;
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 15px 30px;
+    }
+
+    .hero-content {
+        padding: 40px 30px;
+        margin: 0 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .library-header input {
+        width: 100%;
+    }
+
+    #bookContainer {
+        padding: 20px;
+        gap: 30px;
+    }
+}
+
+/* Additional mobile-friendly tweaks */
+@media (max-width: 640px) {
+    .search-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+    .search-controls select { width: 100%; }
+    .search-wrap { width: 100%; }
+    .search-wrap input { width: 100%; padding: 14px 12px; font-size: 1rem; }
+    .suggestions { top: 58px; }
+
+    .add-summary { width: 100%; }
+    .add-details { padding: 10px; }
+
+    .book-card img { height: 260px; }
+    .book-content h3 { font-size: 1.1rem; }
+
+    button.reserve-btn, .btn-add, .btn-cancel, #pagination button {
+        padding: 12px 16px;
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    #pagination { padding: 20px; }
+}
+
+/* Modal styles for reservation */
+.modal { position: fixed; inset: 0; display: none; align-items:center; justify-content:center; z-index:3000; }
+.modal.open, .modal[aria-hidden="false"] { display: flex; }
+.modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.6); }
+.modal-panel { position:relative; background:var(--bg-parchment); color:var(--text-dark); padding:18px; border-radius:8px; width:clamp(320px, 80%, 480px); box-shadow:0 10px 40px rgba(0,0,0,0.6); z-index:2; opacity:0; transform:translateY(8px); transition: transform 200ms ease, opacity 200ms ease; }
+.modal.open .modal-panel { opacity:1; transform:translateY(0); }
+.modal-backdrop { opacity:0; transition: opacity 200ms ease; }
+.modal.open .modal-backdrop { opacity:1; }
+.confirm-panel { max-width: 360px; }
+.confirm-panel p { color: var(--text-secondary); margin: 8px 0 12px; }
+.modal-panel h3 { margin:0 0 8px 0; color:var(--accent-crimson); }
+.modal-panel p { margin:0 0 12px 0; color:var(--text-secondary); }
+.modal-panel select { width:100%; padding:10px; border:1px solid rgba(0,0,0,0.08); border-radius:4px; }
+.modal-actions { justify-content: flex-end; margin-top:12px; }
+
+/* Reservations panel */
+.reservations-panel { max-width:1100px; margin:24px auto; padding:12px 20px; border:1px solid rgba(197,160,89,0.08); background:rgba(30,26,22,0.4); border-radius:6px; }
+.reservations-panel h2 { color:var(--accent-gold); margin:0 0 10px 0; font-size:1.1rem; }
+.reservations-list { display:flex; flex-direction:column; gap:10px; }
+.reservation-item { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px; background:#fff8eb; color:var(--text-dark); border-radius:6px; border:1px solid rgba(0,0,0,0.06); }
+.reservation-item .meta { display:flex; gap:12px; align-items:center; }
+.reservation-item .meta .title { font-weight:700; }
+.reservation-item .meta .due { color:#6b6b6b; font-size:0.95rem; }
+.reservation-item button { padding:8px 12px; border-radius:4px; border:none; cursor:pointer; }
+.reservation-item .btn-cancel-res { background:var(--accent-crimson); color:var(--bg-parchment); }
+
+/* Hide the visible "Current Reservations" block while keeping all JS logic intact.
+   The element remains in the DOM and JavaScript can still read/update it; this
+   rule only prevents it from being shown to users. Remove or comment this rule
+   to make the reservations panel visible again. */
+.reservations-panel, #reservationsPanel {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Additional responsive improvements */
+/* Header/search layout: allow wrapping and flexible inputs */
+.header-controls { flex-wrap: wrap; gap: 12px; align-items: center; }
+.search-controls { display: flex; gap: 12px; align-items: center; flex: 1 1 400px; }
+.search-controls select { flex: 0 0 180px; min-width:120px; }
+
+/* Ensure cart badge and panel behave on small screens */
+.cart-btn { padding: 6px 8px; }
+.cart-count { top: -6px; right: -8px; transform: translateZ(0); }
+.cart-panel { right: 20px; top: 56px; }
+
+/* Make modals and panels fit mobile viewports nicely */
+.modal-panel { max-width: 92vw; margin: 0 4vw; }
+
+/* Improve touch targets on small devices */
+button, .cart-item button { min-height: 44px; }
+
+@media (max-width: 1024px) {
+    .library-header input { max-width: 520px; }
+    .book-card img { max-height: 480px; }
+}
+
+@media (max-width: 640px) {
+    .header-controls { padding: 10px 16px; }
+    .search-controls { flex-direction: column; align-items: stretch; }
+    .search-controls select { width: 100%; }
+    .library-header input { width: 100%; padding: 14px; }
+    .cart-panel { left: 10px; right: 10px; width: auto; top: 72px; }
+    .cart-panel .cart-list { max-height: 320px; }
+    .book-card img { aspect-ratio: 3 / 4; height: auto; }
+    .book-content h3 { font-size: 1.05rem; }
+    button.reserve-btn, .btn-add, .btn-cancel { padding: 12px 14px; font-size: 1rem; }
+    #pagination { padding: 20px; }
+}
+
+/* Make the book grid adapt gracefully on very small screens */
+@media (max-width: 380px) {
+    #bookContainer { grid-template-columns: 1fr; gap: 20px; padding: 12px; }
+    .hero-content h1 { font-size: 1.6rem; }
+}
+
+/* Additional fixes discovered during audit */
+/* Make stats bar responsive and avoid overflow */
+#stats { flex-wrap: wrap; gap: 18px; padding: 12px; }
+#stats span { display: inline-block; min-width: 140px; text-align: center; }
+
+/* Improve grid on mid-sized screens */
+@media (min-width: 640px) and (max-width: 900px) {
+    #bookContainer { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px; padding: 18px; }
+    .book-card img { height: 380px; }
+}
+
+/* Ensure the header h1 shrinks on smaller widths to prevent wrapping into controls */
+.library-header h1 { font-size: clamp(1.4rem, 2.0vw + 1rem, 2.2rem); }
+
+/* Ensure reserve button text wraps cleanly and remains tappable */
+button.reserve-btn { white-space: normal; word-break: keep-all; }
+
+/* Tighten card padding on small screens to fit more content */
+.book-card { padding: 12px 12px 20px 12px; }
+
+/* Avoid very wide images causing horizontal scroll on some mobile UAs */
+img { max-width: 100%; height: auto; }
+
+/* Accessibility: increase contrast for small text in cards if needed */
+.book-content p { color: #3d3226; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}
+
+/* Mobile header control sizing fix (phones) */
+@media (max-width: 480px) {
+    .library-header { padding: 18px 12px; }
+    .header-controls { gap: 10px; }
+
+    /* Make the search/select reasonable height and font-size on phones */
+    .search-controls select,
+    .library-header input {
+        font-size: 1rem !important;
+        padding: 10px 12px !important;
+        height: 52px !important;
+        line-height: 1.1 !important;
+        box-sizing: border-box;
+        border-radius: 4px;
+    }
+
+    .search-controls select { width: 100%; min-width: 0; }
+    .search-wrap { width: 100%; }
+
+    /* Place cart button to the right edge for easier reach */
+    .cart-btn { align-self: flex-end; margin-top: 6px; }
+
+    /* Ensure hero/title doesn't push controls down too far */
+    .library-header h1 { margin-bottom: 8px; }
+}
+
+/* Further reduce the perceived size of header controls on very small phones */
+@media (max-width: 380px) {
+    .library-header { padding: 14px 10px; }
+    .search-controls select,
+    .library-header input {
+        font-size: 0.95rem !important;
+        padding: 8px 10px !important;
+        height: 44px !important;
+    }
+
+    /* If the select is still visually large, reduce its line-height and remove inner padding
+       for mobile-only to make it more compact */
+    .search-controls select option { padding: 6px 8px; }
+
+    /* Reduce vertical spacing between elements */
+    .header-controls { gap: 8px; }
+    .library-header h1 { font-size: 1.6rem; }
+}
+
+/* iPhone SE (portrait ~320px) targeted tweaks for very compact controls */
+@media (max-width: 360px) {
+    .library-header { padding: 12px 8px; }
+
+    .search-controls {
+        gap: 8px;
+        align-items: center;
+    }
+
+    .search-controls select,
+    .library-header input {
+        font-size: 0.9rem !important;
+        padding: 6px 8px !important;
+        height: 36px !important;
+        line-height: 1 !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    /* keep select arrow visible on some UAs while making control compact */
+    .search-controls select { padding-right: 34px !important; background-position: right 10px center !important; background-repeat: no-repeat !important; }
+
+    .search-controls select option { padding: 6px 8px; }
+
+    .cart-btn { margin-top: 6px; align-self: flex-end; }
+
+    .library-header h1 { font-size: 1.55rem; margin-bottom: 6px; }
+}
+
+/* Genre select + search appearance: make them match and behave nicely */
+.header-search .search-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.header-search .search-controls select,
+.header-search .search-controls input {
+    width: 100%;
+    max-width: none;
+    background: var(--bg-parchment);
+    color: var(--text-dark);
+    padding: 10px 12px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    box-sizing: border-box;
+}
+
+/* Strong override to make header controls small regardless of root font-size */
+.library-header .header-search .search-controls input,
+.library-header .header-search .search-controls select {
+    font-size: 1rem !important;
+    padding: 8px 10px !important;
+    height: auto !important;
+    line-height: 1.1 !important;
+}
+
+/* For iPhone SE specifically, force a compact height */
+@media (max-width: 360px) {
+    .library-header .header-search .search-controls input,
+    .library-header .header-search .search-controls select {
+        font-size: 0.95rem !important;
+        padding: 6px 8px !important;
+        height: 36px !important;
+    }
+}
+
+#genreSelect,
+.header-search .search-controls select {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    
+    /* Typography & Sizing */
+    font-size: 16px !important; /* Better for mobile zoom prevention */
+    height: 44px !important;   /* Slightly taller for better touch targets */
+    padding: 0 35px 0 12px !important; /* Standardized padding */
+    line-height: 44px !important; /* Match height to vertically center text */
+    
+    /* Visuals */
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background-color: var(--bg-parchment) !important;
+    color: var(--text-dark) !important;
+    border: 2px solid var(--text-secondary) !important;
+    border-radius: 6px !important;
+    cursor: pointer;
+
+    /* Simplified Arrow (SVG is more reliable than gradients) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 12px !important;
+}
+
+/* Fix for overlapping cards below */
+.book-card, .harry-potter-container {
+    clear: both;
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 360px) {
+    #genreSelect, .header-search .search-controls select {
+        height: 34px !important;
+        padding: 6px 8px !important;
+        font-size: 0.95rem !important;
+    }
+}
+
+/* Keep select arrow visible but make control compact */
+.header-search .search-controls select {
+    -webkit-appearance: menulist-button;
+    appearance: menulist-button;
+    background-image: linear-gradient(45deg, transparent 50%, rgba(0,0,0,0.2) 50%), linear-gradient(135deg, rgba(0,0,0,0.2) 50%, transparent 50%);
+    background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 34px; /* space for arrow */
+}
+
+@media (max-width: 480px) {
+    .header-search .search-controls { gap: 8px; }
+    .header-search .search-controls select,
+    .header-search .search-controls input {
+        padding: 8px 10px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Stack them fully on very narrow devices */
+    .header-search .search-controls { flex-direction: column; align-items: stretch; }
+    .header-search .search-controls select,
+    .header-search .search-controls input { height: 40px; }
+}
