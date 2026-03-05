@@ -19,7 +19,7 @@ let books = [
         "id": 3,
         "title": "The Lord Of The Rings",
         "author": " J.R.R. Tolkien",
-        "stock":1,
+        "stock": 1,
         "image": "img/LOTR.jpg",
         "genre": "Fantasy"
     },
@@ -38,7 +38,7 @@ let books = [
         "author": "Nikola Tesla",
         "stock": 5,
         "image": "img/Tesla.png",
-        "genre": "Non-fiction" 
+        "genre": "Non-fiction"
     }
 ];
 
@@ -121,7 +121,7 @@ const genres = [
 
 let filteredBooks = books;
 let currentPage = 1;
-let booksPerPage = 4;
+let booksPerPage = 6;
 let reservedCount = 0;
 let reservations = []; // {id, title, days, dueDate}
 let pendingReserveId = null;
@@ -142,86 +142,28 @@ function populateGenreSelect() {
 // Initialize the page (load persisted data first)
 loadFromStorage();
 populateGenreSelect();
-populateAddFormGenres();
 updateStats();
 applyFilters();
 renderReservations();
 renderCartPanel();
 
-// Populate genre options for the add-book form
-function populateAddFormGenres() {
-    const sel = document.getElementById('newGenre');
-    if (!sel) return;
-    sel.innerHTML = '<option value="">Select genre</option>' +
-        genres.map(g => `<option value="${g}">${g}</option>`).join('');
+// Initialize Bootstrap components (if available)
+const reserveModalEl = document.getElementById('reserveModal');
+const confirmModalEl = document.getElementById('confirmModal');
+const cartPanelEl = document.getElementById('cartPanel');
+let bootstrapReserveModal = null;
+let bootstrapConfirmModal = null;
+let bootstrapCartOffcanvas = null;
+if (window.bootstrap) {
+    try {
+        if (reserveModalEl) bootstrapReserveModal = new bootstrap.Modal(reserveModalEl);
+        if (confirmModalEl) bootstrapConfirmModal = new bootstrap.Modal(confirmModalEl);
+        if (cartPanelEl) bootstrapCartOffcanvas = new bootstrap.Offcanvas(cartPanelEl);
+    } catch (e) {
+        // ignore bootstrap initialization errors
+    }
 }
 
-populateAddFormGenres();
-
-// Handle add-book form submission
-const addForm = document.getElementById('addBookForm');
-if (addForm) {
-    addForm.addEventListener('submit', function (ev) {
-        ev.preventDefault();
-        const title = document.getElementById('newTitle').value.trim();
-        const author = document.getElementById('newAuthor').value.trim();
-        const genre = document.getElementById('newGenre').value;
-        const stockVal = document.getElementById('newStock').value;
-        const image = document.getElementById('newImage').value.trim() || 'img/placeholder.jpg';
-
-        if (!title || !author || !genre) {
-            showToast('Please provide Title, Author and Genre.', 'error');
-            return;
-        }
-
-        const stock = parseInt(stockVal, 10) || 0;
-        const nextId = books.reduce((m, b) => Math.max(m, b.id), 0) + 1;
-
-        const newBook = { id: nextId, title, author, stock, image, genre };
-        books.push(newBook);
-        saveToStorage();
-
-        // reset form
-        addForm.reset();
-
-        updateStats();
-        applyFilters();
-        populateGenreSelect();
-        populateAddFormGenres();
-        showToast('Book added.', 'success');
-    });
-}
-
-// Image preview for the new-image field
-const newImageInput = document.getElementById('newImage');
-const newImagePreview = document.getElementById('newImagePreview');
-if (newImageInput && newImagePreview) {
-    newImageInput.addEventListener('input', function () {
-        const url = newImageInput.value.trim();
-        if (!url) {
-            newImagePreview.src = 'img/placeholder.jpg';
-            return;
-        }
-        newImagePreview.src = url;
-    });
-
-    // fallback to placeholder on error
-    newImagePreview.addEventListener('error', function () {
-        newImagePreview.src = 'img/placeholder.jpg';
-    });
-}
-
-// Cancel button: reset form and close details
-const cancelBtn = document.getElementById('cancelAdd');
-if (cancelBtn) {
-    cancelBtn.addEventListener('click', function () {
-        if (addForm) addForm.reset();
-        if (newImagePreview) newImagePreview.src = 'img/placeholder.jpg';
-        // close the details element if open
-        const details = document.querySelector('.add-details');
-        if (details && details.open) details.open = false;
-    });
-}
 
 // Live search as the user types
 document.addEventListener("keyup", function (e) {
@@ -259,6 +201,10 @@ function updateSuggestions() {
 
     if (!keyword) {
         list.hidden = true;
+        // reset any inline sizing we applied earlier
+        list.style.width = '';
+        list.style.left = '';
+        list.style.right = '';
         return;
     }
 
@@ -268,6 +214,13 @@ function updateSuggestions() {
         li.innerText = 'No results';
         li.setAttribute('aria-selected', 'false');
         list.appendChild(li);
+        // ensure dropdown width matches the input
+        try {
+            list.style.width = input.offsetWidth + 'px';
+            list.style.left = input.offsetLeft + 'px';
+            list.style.right = 'auto';
+            list.style.boxSizing = 'border-box';
+        } catch (e) { }
         list.hidden = false;
         return;
     }
@@ -284,6 +237,13 @@ function updateSuggestions() {
         });
         list.appendChild(li);
     });
+    // size and position the suggestions dropdown to match the input width
+    try {
+        list.style.width = input.offsetWidth + 'px';
+        list.style.left = input.offsetLeft + 'px';
+        list.style.right = 'auto';
+        list.style.boxSizing = 'border-box';
+    } catch (e) { }
 
     list.hidden = false;
 }
@@ -351,10 +311,16 @@ const confirmBtn = document.getElementById('confirmReserve');
 if (confirmBtn) confirmBtn.addEventListener('click', confirmReserveHandler);
 const cancelReserveBtn = document.getElementById('cancelReserve');
 if (cancelReserveBtn) cancelReserveBtn.addEventListener('click', cancelReserveHandler);
-// Cart button wiring
+// Cart button wiring (use Bootstrap Offcanvas when available)
 const cartBtn = document.getElementById('cartBtn');
-const cartPanel = document.getElementById('cartPanel');
-if (cartBtn && cartPanel) {
+if (cartBtn && bootstrapCartOffcanvas) {
+    cartBtn.addEventListener('click', () => {
+        bootstrapCartOffcanvas.show();
+        renderCartPanel();
+    });
+} else if (cartBtn) {
+    // fallback to previous behavior
+    const cartPanel = document.getElementById('cartPanel');
     cartBtn.addEventListener('click', () => {
         const open = cartPanel.classList.toggle('open');
         cartPanel.setAttribute('aria-hidden', String(!open));
@@ -362,50 +328,44 @@ if (cartBtn && cartPanel) {
     });
 }
 const closeCart = document.getElementById('closeCart');
-if (closeCart) closeCart.addEventListener('click', () => { cartPanel.classList.remove('open'); cartPanel.setAttribute('aria-hidden','true'); });
+if (closeCart && bootstrapCartOffcanvas) {
+    closeCart.addEventListener('click', () => bootstrapCartOffcanvas.hide());
+} else if (closeCart) {
+    closeCart.addEventListener('click', () => { const cartPanel = document.getElementById('cartPanel'); cartPanel.classList.remove('open'); cartPanel.setAttribute('aria-hidden', 'true'); });
+}
 
 // In-page confirmation modal helper
 function showConfirm(message, onYes, onNo) {
-    const modal = document.getElementById('confirmModal');
     const msg = document.getElementById('confirmMessage');
     const yes = document.getElementById('confirmYes');
     const no = document.getElementById('confirmNo');
-    if (!modal || !msg || !yes || !no) {
-        // fallback to browser confirm
+
+    if (!msg || !yes || !no) {
         const ok = window.confirm(message);
         if (ok && typeof onYes === 'function') onYes();
         else if (!ok && typeof onNo === 'function') onNo();
         return;
     }
 
-    // set message and show with animation
     msg.innerText = message;
-    modal.classList.add('open');
-    modal.hidden = false;
-    modal.setAttribute('aria-hidden', 'false');
 
-    // ensure CSS transition runs
-    const panel = modal.querySelector('.modal-panel');
-    if (panel) panel.offsetHeight; // force reflow
+    // remove previous listeners to avoid duplicates
+    const newYes = yes.cloneNode(true);
+    const newNo = no.cloneNode(true);
+    yes.parentNode.replaceChild(newYes, yes);
+    no.parentNode.replaceChild(newNo, no);
 
-    function cleanup() {
-        // start hide animation by removing 'open' (backdrop/panel styles use .open)
-        modal.classList.remove('open');
-        // wait for animation to finish before hiding
-        setTimeout(() => {
-            modal.hidden = true;
-            modal.setAttribute('aria-hidden', 'true');
-        }, 220);
+    newYes.addEventListener('click', function () {
+        if (bootstrapConfirmModal) bootstrapConfirmModal.hide();
+        if (typeof onYes === 'function') onYes();
+    });
 
-        yes.removeEventListener('click', onYesClick);
-        no.removeEventListener('click', onNoClick);
-    }
+    newNo.addEventListener('click', function () {
+        if (bootstrapConfirmModal) bootstrapConfirmModal.hide();
+        if (typeof onNo === 'function') onNo();
+    });
 
-    function onYesClick() { cleanup(); if (typeof onYes === 'function') onYes(); }
-    function onNoClick() { cleanup(); if (typeof onNo === 'function') onNo(); }
-
-    yes.addEventListener('click', onYesClick);
-    no.addEventListener('click', onNoClick);
+    if (bootstrapConfirmModal) bootstrapConfirmModal.show();
 }
 
 function displayBooks() {
@@ -417,10 +377,7 @@ function displayBooks() {
     // If no books match the current filters, show a friendly message
     if (!filteredBooks || filteredBooks.length === 0) {
         const empty = document.createElement('div');
-        empty.style.padding = '40px 20px';
-        empty.style.textAlign = 'center';
-        empty.style.color = 'var(--text-secondary)';
-        empty.style.fontSize = '1.1rem';
+        empty.className = 'col-12 text-center py-4 text-muted';
         empty.innerText = 'No results found.';
         container.appendChild(empty);
         // still update pagination (will hide when 0 pages)
@@ -431,41 +388,58 @@ function displayBooks() {
     const start = (currentPage - 1) * booksPerPage;
     const paginated = filteredBooks.slice(start, start + booksPerPage);
 
-    // Loop through filtered/paginated books and create HTML
+    // Loop through filtered/paginated books and create Bootstrap card HTML
     paginated.forEach(book => {
-        const card = document.createElement("div");
-        card.className = "book-card";
+        const col = document.createElement('div');
+        col.className = 'col';
 
-        let stockText = "";
-        let stockClass = "";
+        const card = document.createElement('div');
+        card.className = 'card h-100';
 
-        // Check availability status to apply your CSS classes
+        const img = document.createElement('img');
+        img.className = 'card-img-top';
+        img.src = book.image || 'img/placeholder.jpg';
+        img.alt = book.title;
+
+        const body = document.createElement('div');
+        body.className = 'card-body d-flex flex-column';
+
+        const title = document.createElement('h5');
+        title.className = 'card-title';
+        title.innerText = book.title;
+
+        const author = document.createElement('p');
+        author.className = 'card-text text-muted mb-2';
+        author.innerText = book.author;
+
+        const stock = document.createElement('p');
+        stock.className = 'mb-3';
         if (book.stock === 0) {
-            stockText = "Unavailable";
-            stockClass = "stock-unavailable";
+            stock.innerHTML = '<span class="badge bg-secondary">Unavailable</span>';
         } else if (book.stock <= 2) {
-            stockText = `Low Stock: ${book.stock}`;
-            stockClass = "stock-low";
+            stock.innerHTML = `<span class="badge bg-warning text-dark">Low Stock: ${book.stock}</span>`;
         } else {
-            stockText = `Available: ${book.stock}`;
-            stockClass = "stock-available";
+            stock.innerHTML = `<span class="badge bg-success">Available: ${book.stock}</span>`;
         }
 
-        card.innerHTML = `
-            <img src="${book.image}" alt="Book Cover">
-            <div class="book-content">
-                <h3>${book.title}</h3>
-                <p>${book.author}</p>
-                <p class="stock-status ${stockClass}">${stockText}</p>
-                
-                <button class="reserve-btn" ${book.stock === 0 ? "disabled" : ""} 
-                    onclick="reserveBook(${book.id})">
-                    Acquire Tome
-                </button>
-            </div>
-        `;
+        const footer = document.createElement('div');
+        footer.className = 'mt-auto';
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary w-100';
+        btn.innerText = 'Acquire Tome';
+        if (book.stock === 0) btn.disabled = true;
+        btn.addEventListener('click', () => reserveBook(book.id));
 
-        container.appendChild(card);
+        body.appendChild(title);
+        body.appendChild(author);
+        body.appendChild(stock);
+        footer.appendChild(btn);
+        body.appendChild(footer);
+
+        card.appendChild(img);
+        card.appendChild(body);
+        col.appendChild(card);
+        container.appendChild(col);
     });
 
     createPagination();
@@ -494,20 +468,27 @@ function reserveBook(id) {
     nameEl.innerText = `Reserve "${book.title}" — select how many days (max 15):`;
 
     // populate days 1..15
-    daysSel.innerHTML = Array.from({ length: 15 }, (_, i) => `<option value="${i+1}">${i+1} day${i+1>1?'s':''}</option>`).join('');
+    daysSel.innerHTML = Array.from({ length: 15 }, (_, i) => `<option value="${i + 1}">${i + 1} day${i + 1 > 1 ? 's' : ''}</option>`).join('');
     daysSel.value = '7';
 
-    // show modal using class so CSS doesn't override hidden
-    modal.classList.add('open');
-    modal.hidden = false;
-    modal.setAttribute('aria-hidden', 'false');
-    // small timeout to ensure browser renders options before focus
-    setTimeout(() => daysSel.focus(), 10);
+    // show modal using Bootstrap modal if available, otherwise fallback
+    if (bootstrapReserveModal) {
+        bootstrapReserveModal.show();
+        setTimeout(() => daysSel.focus(), 200);
+    } else {
+        modal.classList.add('open');
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        // small timeout to ensure browser renders options before focus
+        setTimeout(() => daysSel.focus(), 10);
+    }
 }
 
 function hideReserveModal() {
     const modal = document.getElementById('reserveModal');
-    if (modal) {
+    if (bootstrapReserveModal) {
+        try { bootstrapReserveModal.hide(); } catch (e) { /* ignore */ }
+    } else if (modal) {
         modal.classList.remove('open');
         modal.hidden = true;
         modal.setAttribute('aria-hidden', 'true');
@@ -596,7 +577,7 @@ function renderReservations() {
         title.innerText = r.title;
         const due = document.createElement('div');
         due.className = 'due';
-        due.innerText = `Due: ${r.dueDate} (${r.days} day${r.days>1?'s':''})`;
+        due.innerText = `Due: ${r.dueDate} (${r.days} day${r.days > 1 ? 's' : ''})`;
         meta.appendChild(title);
         meta.appendChild(due);
 
@@ -753,17 +734,28 @@ function createPagination() {
 
     pagination.innerHTML = "";
     const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
+    if (totalPages <= 1) return;
+
+    const ul = document.createElement('ul');
+    ul.className = 'pagination justify-content-center';
 
     for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.innerText = i;
-        btn.onclick = () => {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (i === currentPage ? ' active' : '');
+        const a = document.createElement('button');
+        a.className = 'page-link';
+        a.type = 'button';
+        a.innerText = i;
+        a.addEventListener('click', () => {
             currentPage = i;
             displayBooks();
             window.scrollTo({ top: 300, behavior: 'smooth' });
-        };
-        pagination.appendChild(btn);
+        });
+        li.appendChild(a);
+        ul.appendChild(li);
     }
+
+    pagination.appendChild(ul);
 }
 
 function updateStats() {

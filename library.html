@@ -4,6 +4,7 @@
 <head>
     <title>Library System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,99 +22,115 @@
 
     <header class="library-header">
         <!-- Top row: back button (left) and cart (right) -->
-        <div class="header-top" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-            <a href="index.html" class="back-btn">&#x21A4; Return to Hall</a>
-            <button id="cartBtn" class="cart-btn" aria-label="View reservations">
-                <span class="cart-icon">🛒</span>
-                <span id="cartCount" class="cart-count">0</span>
-            </button>
+        <div class="container py-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="index.html" class="back-btn">&#x21A4; Return to The Menu</a>
+                <button id="cartBtn" class="btn btn-outline-secondary position-relative" aria-label="View reservations">
+                    <span class="cart-icon">🛒</span>
+                    <span id="cartCount" class="badge bg-primary text-white position-absolute"
+                        style="top:-8px;right:-10px;">0</span>
+                </button>
+            </div>
         </div>
 
         <!-- Title centered on its own row for better wrapping on narrow screens -->
-        <div class="header-title" style="text-align:center;margin:10px 0;">
-            <h1>The Book Catalog</h1>
+        <div class="container text-center my-2">
+            <h1 class="h3">The Book Catalog</h1>
         </div>
 
-        <!-- Search row: stacked controls that become full-width on phones -->
-        <div class="header-search">
-            <div class="search-controls" style="display:flex;gap:12px;align-items:center;">
-                <select id="genreSelect" aria-label="Select genre">
-                    <option value="All">All Genres</option>
-                </select>
-                <input type="text" id="searchInput" placeholder="Search by Title">
-            </div>
-
-            <!-- keep cart panel but move it here so it overlays near the cart button -->
-            <div id="cartPanel" class="cart-panel" aria-hidden="true">
-                <div class="cart-list" id="cartList"></div>
-                <div class="cart-footer">
-                    <button id="closeCart" class="btn-cancel">Close</button>
+        <!-- Search row: responsive using Bootstrap grid (select small, input fluid) -->
+        <div class="container header-search">
+            <div class="row gx-2 align-items-center">
+                <div class="col-auto">
+                    <select id="genreSelect" class="form-select form-select-sm" aria-label="Select genre">
+                        <option value="All">All Genres</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <div class="position-relative">
+                        <input type="text" id="searchInput" class="form-control form-control-sm"
+                            placeholder="Search by Title">
+                        <ul id="suggestions" class="suggestions" role="listbox" hidden aria-hidden="true"></ul>
+                    </div>
                 </div>
             </div>
+
+            <!-- cart panel moved to Offcanvas (defined later) -->
         </div>
     </header>
-
-    <div id="stats">
-        <span id="totalBooks"></span>
-        <span id="reservedCount"></span>
-    </div>
-
-    <div class="admin-add">
-        <details>
-            <summary>Add a New Book</summary>
-            <form id="addBookForm" class="add-book-form">
-                <input type="text" id="newTitle" placeholder="Title" required>
-                <input type="text" id="newAuthor" placeholder="Author" required>
-                <select id="newGenre" required>
-                    <option value="">Select genre</option>
-                </select>
-                <input type="number" id="newStock" placeholder="Stock" min="0" value="1" required>
-                <input type="text" id="newImage" placeholder="Image URL (optional)">
-                <button type="submit">Add Book</button>
-            </form>
-        </details>
-    </div>
-
-    <div id="bookContainer"></div>
-    <div id="pagination"></div>
-
-    <!-- Reservation modal -->
-    <div id="reserveModal" class="modal" hidden aria-hidden="true">
-        <div class="modal-backdrop"></div>
-        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="reserveTitle">
-            <h3 id="reserveTitle">Reserve Book</h3>
-            <p id="reserveBookName">Select how many days to reserve this book (max 15 days):</p>
-            <label class="field">
-                <select id="reserveDays">
-                    <!-- options populated by JS -->
-                </select>
-            </label>
-            <div class="form-actions modal-actions">
-                <button type="button" id="confirmReserve" class="btn-add">Confirm</button>
-                <button type="button" id="cancelReserve" class="btn-cancel">Cancel</button>
-            </div>
+    <main class="container my-4">
+        <div id="stats" class="mb-3 d-flex gap-3">
+            <span id="totalBooks" class="me-3"></span>
+            <span id="reservedCount"></span>
         </div>
-    </div>
+
+
+
+        <div id="bookContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
+        <nav id="pagination" aria-label="Books pagination" class="mt-4"></nav>
+    </main>
 
     <!-- Current reservations (UI only) -->
     <section id="reservationsPanel" class="reservations-panel">
         <h2>Current Reservations</h2>
         <div id="reservationsList">No reservations yet.</div>
     </section>
-
-    <!-- Confirmation modal (in-page, replaces browser confirm) -->
-    <div id="confirmModal" class="modal" hidden aria-hidden="true">
-        <div class="modal-backdrop"></div>
-        <div class="modal-panel confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-            <h3 id="confirmTitle">Please confirm</h3>
-            <p id="confirmMessage">Are you sure?</p>
-            <div class="form-actions modal-actions">
-                <button type="button" id="confirmYes" class="btn-add">Yes</button>
-                <button type="button" id="confirmNo" class="btn-cancel">No</button>
+    <!-- Bootstrap Offcanvas for Cart -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartPanel" aria-labelledby="cartPanelLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="cartPanelLabel">Reservations</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <div class="cart-list mb-3" id="cartList"></div>
+            <div class="cart-footer mt-auto text-end">
+                <button id="closeCart" class="btn btn-secondary" data-bs-dismiss="offcanvas">Close</button>
             </div>
         </div>
     </div>
 
+    <!-- Reservation modal (Bootstrap) -->
+    <div class="modal fade" id="reserveModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reserveTitle">Reserve Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="reserveBookName">Select how many days to reserve this book (max 15 days):</p>
+                    <label class="form-label" for="reserveDays">Days</label>
+                    <select id="reserveDays" class="form-select"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmReserve" class="btn btn-primary">Confirm</button>
+                    <button type="button" id="cancelReserve" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation modal (Bootstrap) -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmTitle">Please confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmYes" class="btn btn-primary">Yes</button>
+                    <button type="button" id="confirmNo" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
     <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 </body>
