@@ -1,4 +1,3 @@
-
 let books = [
     {
         "id": 1,
@@ -414,6 +413,20 @@ function displayBooks() {
     if (!container) return;
 
     container.innerHTML = ""; // Clear current view
+
+    // If no books match the current filters, show a friendly message
+    if (!filteredBooks || filteredBooks.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.padding = '40px 20px';
+        empty.style.textAlign = 'center';
+        empty.style.color = 'var(--text-secondary)';
+        empty.style.fontSize = '1.1rem';
+        empty.innerText = 'No results found.';
+        container.appendChild(empty);
+        // still update pagination (will hide when 0 pages)
+        createPagination();
+        return;
+    }
 
     const start = (currentPage - 1) * booksPerPage;
     const paginated = filteredBooks.slice(start, start + booksPerPage);
