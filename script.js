@@ -5,7 +5,8 @@ let books = [
         "author": "J.K. Rowling",
         "stock": 3,
         "image": "img/harrypotter.jpg",
-        "genre": "Fantasy"
+        "genre": "Fantasy",
+        "summary": "On his eleventh birthday, orphan Harry Potter discovers he is a wizard and is whisked away to Hogwarts School of Witchcraft and Wizardry. Beneath the wonder of spells and moving staircases lurks a dark secret — an immortal sorcerer's stone and the shadow of a villain who once nearly destroyed the wizarding world. The first chapter in an epic saga of courage, friendship, and the eternal battle between light and darkness."
     },
     {
         "id": 2,
@@ -13,15 +14,17 @@ let books = [
         "author": "Adolf Hitler",
         "stock": 1,
         "image": "img/adolfhitler.jpg",
-        "genre": "History"
+        "genre": "History",
+        "summary": "Written during Hitler's imprisonment in 1924, this autobiographical manifesto outlines his political ideology, virulent antisemitism, and vision of Aryan supremacy that would go on to fuel the Nazi regime and the horrors of World War II. Held in this archive as a primary historical document — a stark testament to how dangerous ideas, left unchecked, can reshape the world in catastrophic ways. Reader discretion is strongly advised."
     },
     {
         "id": 3,
         "title": "The Lord Of The Rings",
-        "author": " J.R.R. Tolkien",
+        "author": "J.R.R. Tolkien",
         "stock": 1,
         "image": "img/LOTR.jpg",
-        "genre": "Fantasy"
+        "genre": "Fantasy",
+        "summary": "In the ancient land of Middle-earth, a modest hobbit named Frodo Baggins inherits the One Ring — a relic of terrible power forged by the Dark Lord Sauron. With a fellowship of unlikely companions, he embarks on an impossible quest to destroy it in the fires of Mount Doom before it falls back into shadow. Tolkien's masterwork weaves myth, language, and legend into the definitive fantasy epic of the modern age."
     },
     {
         "id": 4,
@@ -29,18 +32,20 @@ let books = [
         "author": "Paul Kriwaczek",
         "stock": 5,
         "image": "img/babylon.jpg",
-        "genre": "History"
+        "genre": "History",
+        "summary": "Long before Rome or Athens, Babylon rose from the sands of Mesopotamia as humanity's first great metropolis. Kriwaczek traces five thousand years of Babylonian civilisation — from the invention of writing and law under Hammurabi, to the legendary Hanging Gardens, to its eventual fall. A vivid and scholarly journey to the very cradle of human culture, politics, and urban life."
     },
-
     {
         "id": 5,
         "title": "The Tesla Coil",
         "author": "Nikola Tesla",
         "stock": 5,
         "image": "img/Tesla.png",
-        "genre": "Non-fiction"
+        "genre": "Non-fiction",
+        "summary": "A rare compendium of Nikola Tesla's own writings, patents, and lectures surrounding his most celebrated invention — the Tesla Coil. With characteristic visionary fervour, Tesla illuminates the principles of resonant transformer circuits and his grand dream of wireless energy transmission across continents. Essential reading for anyone wishing to understand the mind behind the modern electrical age."
     }
 ];
+
 
 // Supported genres (will populate the dropdown)
 const defaultBooks = [...books]; // Store default books for fallback
@@ -84,8 +89,16 @@ function loadFromStorage() {
         defaultBooks.forEach(def => {
             const stored = books.find(b => b.id === def.id);
             const hasReservation = reservations.some(r => r.id === def.id);
-            if (stored && !hasReservation && (Number(stored.stock) < Number(def.stock))) {
-                stored.stock = Number(def.stock) || 0;
+            if (stored) {
+                // Restore stock if no reservation holds it
+                if (!hasReservation && (Number(stored.stock) < Number(def.stock))) {
+                    stored.stock = Number(def.stock) || 0;
+                }
+                // Always sync metadata from source so new fields (e.g. summary)
+                // added after the user's localStorage was written are never missing
+                if (!stored.summary) stored.summary = def.summary;
+                if (!stored.image) stored.image = def.image;
+                if (!stored.genre) stored.genre = def.genre;
             }
         });
     } catch (e) {
@@ -109,13 +122,13 @@ function saveToStorage() {
 }
 
 const genres = [
-    "Fantasy",
-    "Non-fiction",
-    "History",
     "Biography",
+    "Fantasy",
     "Geography",
-    "Music",
+    "History",
     "Language",
+    "Music",
+    "Non-fiction",
     "Survival fiction"
 ];
 
@@ -374,12 +387,8 @@ function displayBooks() {
 
     container.innerHTML = ""; // Clear current view
 
-    // If no books match the current filters, show a friendly message
+    // If no books match the current filters, just show nothing
     if (!filteredBooks || filteredBooks.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'col-12 text-center py-4 text-muted';
-        empty.innerText = 'No results found.';
-        container.appendChild(empty);
         // still update pagination (will hide when 0 pages)
         createPagination();
         return;
@@ -440,9 +449,47 @@ function displayBooks() {
         card.appendChild(body);
         col.appendChild(card);
         container.appendChild(col);
+
+        // Make the cover image open the summary modal on click
+        img.style.cursor = 'pointer';
+        img.title = 'Click to learn about this tome';
+        img.addEventListener('click', () => showBookInfo(book));
     });
 
     createPagination();
+}
+
+// Show book info/summary modal
+function showBookInfo(book) {
+    const modal = document.getElementById('bookInfoModal');
+    if (!modal) return;
+
+    // Populate modal fields
+    const infoImg = document.getElementById('infoBookImg');
+    const infoTitle = document.getElementById('infoBookTitle');
+    const infoAuthor = document.getElementById('infoBookAuthor');
+    const infoGenre = document.getElementById('infoBookGenre');
+    const infoSummary = document.getElementById('infoBookSummary');
+
+    if (infoImg) { infoImg.src = book.image || ''; infoImg.alt = book.title; }
+    if (infoTitle) infoTitle.innerText = book.title;
+    if (infoAuthor) infoAuthor.innerText = book.author;
+    if (infoGenre) infoGenre.innerText = book.genre || '';
+    if (infoSummary) infoSummary.innerText = book.summary || 'No summary available.';
+
+    // Open via Bootstrap if available
+    if (window.bootstrap) {
+        try {
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+            bsModal.show();
+        } catch (e) {
+            modal.classList.add('show');
+            modal.style.display = 'block';
+        }
+    } else {
+        modal.classList.add('show');
+        modal.style.display = 'block';
+    }
 }
 
 // Logic to handle reserving a book
