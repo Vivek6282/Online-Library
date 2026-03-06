@@ -1856,3 +1856,67 @@ img {
     color: var(--text-dark);
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
+
+/* ===== LOGIN PAGE ===== */
+.login-section {
+    min-height: calc(100vh - 160px);
+    /* Slightly more room for header/footer */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    /* Increased top/bottom padding to prevent clustering */
+}
+
+.login-box {
+    max-width: 480px !important;
+    /* Slightly wider for better proportions */
+    padding: 60px !important;
+    margin-top: -60px;
+    /* Shifted up as requested */
+}
+
+.login-subtitle {
+    font-size: 1.1rem !important;
+    margin-bottom: 30px !important;
+}
+
+.vintage-input {
+    font-family: var(--font-mono) !important;
+    background: var(--bg-parchment) !important;
+    color: var(--text-dark) !important;
+    border: 2px solid var(--text-secondary) !important;
+    border-radius: 6px !important;
+    padding: 10px 15px !important;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.vintage-input:focus {
+    outline: none !important;
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.4), inset 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    border-color: var(--accent-gold) !important;
+}
+
+.vintage-input::placeholder {
+    color: rgba(44, 36, 27, 0.6) !important;
+}
+
+.login-form label {
+    color: var(--accent-gold);
+    font-family: var(--font-heading);
+    letter-spacing: 1px;
+}
+
+.forgot-link {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-style: italic;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+    color: var(--accent-gold);
+    text-decoration: underline;
+}
