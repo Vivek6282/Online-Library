@@ -214,27 +214,18 @@ function updateSuggestions() {
 
     if (!keyword) {
         list.hidden = true;
-        // reset any inline sizing we applied earlier
-        list.style.width = '';
-        list.style.left = '';
-        list.style.right = '';
+        list.setAttribute('aria-hidden', 'true');
         return;
     }
 
     if (matches.length === 0) {
         const li = document.createElement('li');
         li.className = 'no-result';
-        li.innerText = 'No results';
+        li.innerText = 'No records found in the Archive';
         li.setAttribute('aria-selected', 'false');
         list.appendChild(li);
-        // ensure dropdown width matches the input
-        try {
-            list.style.width = input.offsetWidth + 'px';
-            list.style.left = input.offsetLeft + 'px';
-            list.style.right = 'auto';
-            list.style.boxSizing = 'border-box';
-        } catch (e) { }
         list.hidden = false;
+        list.setAttribute('aria-hidden', 'false');
         return;
     }
 
@@ -250,15 +241,9 @@ function updateSuggestions() {
         });
         list.appendChild(li);
     });
-    // size and position the suggestions dropdown to match the input width
-    try {
-        list.style.width = input.offsetWidth + 'px';
-        list.style.left = input.offsetLeft + 'px';
-        list.style.right = 'auto';
-        list.style.boxSizing = 'border-box';
-    } catch (e) { }
 
     list.hidden = false;
+    list.setAttribute('aria-hidden', 'false');
 }
 
 function hideSuggestionsSoon() {
@@ -434,10 +419,23 @@ function displayBooks() {
         const footer = document.createElement('div');
         footer.className = 'mt-auto';
         const btn = document.createElement('button');
-        btn.className = 'btn btn-primary w-100';
-        btn.innerText = 'Acquire Tome';
-        if (book.stock === 0) btn.disabled = true;
-        btn.addEventListener('click', () => reserveBook(book.id));
+
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+        if (isLoggedIn) {
+            btn.className = 'btn btn-primary w-100';
+            btn.innerText = 'Acquire Tome';
+            if (book.stock === 0) btn.disabled = true;
+            btn.addEventListener('click', () => reserveBook(book.id));
+        } else {
+            btn.className = 'btn btn-outline-secondary w-100';
+            btn.innerText = 'Member Benefit';
+            btn.title = 'Login to Acquire this Tome';
+            btn.addEventListener('click', () => {
+                showToast('Please login to reserve records.', 'info');
+                setTimeout(() => window.location.href = 'login.html', 1200);
+            });
+        }
 
         body.appendChild(title);
         body.appendChild(author);
@@ -494,6 +492,15 @@ function showBookInfo(book) {
 
 // Logic to handle reserving a book
 function reserveBook(id) {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+        showToast('Please login to reserve this tome from the Archive.', 'error');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
+
     const book = books.find(b => b.id === id);
     if (!book) return;
     if (book.stock <= 0) {
@@ -564,14 +571,9 @@ function doConfirmReserve(days) {
     // aggregate reservations by book id (front-end only)
     const existing = reservations.find(r => r.id === book.id);
     if (existing) {
-        // only allow additional reservation if stock available
-        if (book.stock <= 0) {
-            showToast('No more copies available to reserve.', 'error');
-            hideReserveModal();
-            return;
-        }
-        existing.qty = (existing.qty || 1) + 1;
-        // keep the original days/dueDate for the reservation
+        showToast('You have already reserved this tome.', 'info');
+        hideReserveModal();
+        return;
     } else {
         const reservation = { id: book.id, title: book.title, days: daysClamped, dueDate: dueISO, qty: 1 };
         reservations.push(reservation);
@@ -794,9 +796,31 @@ function createPagination() {
         a.type = 'button';
         a.innerText = i;
         a.addEventListener('click', () => {
-            currentPage = i;
-            displayBooks();
-            window.scrollTo({ top: 300, behavior: 'smooth' });
+            if (currentPage === i) return;
+
+            const container = document.getElementById("bookContainer");
+            if (container) {
+                // Trigger the Rolling Pillar animation
+                container.classList.remove('rolling-pillar');
+                void container.offsetWidth; // Trigger reflow
+                container.classList.add('rolling-pillar');
+
+                // Update content at the "mid-point" of the roll (approx 400ms)
+                setTimeout(() => {
+                    currentPage = i;
+                    displayBooks();
+                    window.scrollTo({ top: 300, behavior: 'smooth' });
+                }, 400);
+
+                // Clean up class after animation
+                setTimeout(() => {
+                    container.classList.remove('rolling-pillar');
+                }, 800);
+            } else {
+                currentPage = i;
+                displayBooks();
+                window.scrollTo({ top: 300, behavior: 'smooth' });
+            }
         });
         li.appendChild(a);
         ul.appendChild(li);
@@ -833,4 +857,145 @@ function applyFilters() {
 
     currentPage = 1; // reset paging
     displayBooks();
+}
+// --- AUTHENTICATION INTEGRATION ---
+
+function checkAuthStatus() {
+    const authBtn = document.getElementById('authBtn');
+    const cartBtn = document.getElementById('cartBtn');
+    const reservedStat = document.getElementById('reservedCount');
+    if (!authBtn) return;
+
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    // Remove all previous custom classes so we don't stack them
+    authBtn.classList.remove('btn-logout', 'btn-outline-primary', 'btn-outline-danger');
+
+    if (isLoggedIn) {
+        authBtn.innerText = 'Logout';
+        authBtn.classList.add('btn-logout');
+        if (cartBtn) cartBtn.style.display = 'flex';
+        if (reservedStat) reservedStat.style.display = 'inline-block';
+    } else {
+        authBtn.innerText = 'Login';
+        if (cartBtn) cartBtn.style.display = 'none';
+        if (reservedStat) reservedStat.style.display = 'none';
+        // Keeps the default gold look from #authBtn style
+    }
+}
+
+function handleAuthAction() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    if (isLoggedIn) {
+        // Logout
+        localStorage.removeItem('isLoggedIn');
+        window.location.reload();
+    } else {
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * --- VISUAL MOTION: SCROLL REVEAL ---
+ * Uses IntersectionObserver to trigger 'visible' class on elements
+ * tagged with 'reveal'. 
+ */
+function initScrollReveal() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    // Initial tagging: We'll tag book cards as they are rendered in displayBooks()
+}
+
+// Modify displayBooks to include reveal classes
+const originalDisplayBooks = displayBooks;
+displayBooks = function () {
+    originalDisplayBooks();
+
+    // Tag all newly created col elements for reveal
+    const cards = document.querySelectorAll('#bookContainer .col');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    cards.forEach(card => {
+        card.classList.add('reveal');
+        observer.observe(card);
+    });
+};
+
+// Initialize Auth and Motion
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuthStatus();
+    const authBtn = document.getElementById('authBtn');
+    if (authBtn) {
+        authBtn.addEventListener('click', handleAuthAction);
+    }
+
+    // Smooth scroll for anchors
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            // Hide suggestions list when an anchor is clicked
+            const suggestionsList = document.querySelector('.suggestions-list-archival');
+            if (suggestionsList) {
+                suggestionsList.hidden = true;
+            }
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // --- INTERACTIVE BACKGROUND MOTION ---
+    const collage = document.getElementById('interactiveCollage');
+    if (collage) {
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 45;
+            const y = (window.innerHeight / 2 - e.pageY) / 45;
+
+            // Move opposite to mouse for depth effect
+            collage.style.transform = `translateX(${x}px) translateY(${y}px) scale(1.05)`;
+        });
+    }
+
+    createDustMotes();
+});
+
+
+// --- ATMOSPHERE: DUST MOTES ---
+function createDustMotes() {
+    const container = document.getElementById('dustMotes');
+    if (!container) return;
+
+    for (let i = 0; i < 40; i++) {
+        const mote = document.createElement('div');
+        mote.className = 'mote';
+        const size = Math.random() * 3 + 1;
+        mote.style.width = size + 'px';
+        mote.style.height = size + 'px';
+        mote.style.left = (Math.random() * 100) + '%';
+        mote.style.top = (Math.random() * 100) + '%';
+        mote.style.animationDelay = (Math.random() * 10) + 's';
+        mote.style.opacity = (Math.random() * 0.2 + 0.05);
+        container.appendChild(mote);
+    }
 }

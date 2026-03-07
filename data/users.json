@@ -1,0 +1,9 @@
+{
+  "//comment": "This file stores predefined login credentials. In a real application, credentials must never be stored in plaintext like this and should instead be managed securely on the server.",
+  "users": [
+    {
+      "username": "curator",
+      "password": "AuroraTree!23"
+    }
+  ]
+}
