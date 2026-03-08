@@ -14,7 +14,7 @@ let books = [
         "id": 2,
         "title": "MEIN KAMPF",
         "author": "Adolf Hitler",
-        "stock": 1,
+        "stock": 0,
         "image": "img/adolfhitler.jpg",
         "genre": "Biography, History",
         "summary": "Written during Hitler's imprisonment in 1924, this autobiographical manifesto outlines his political ideology, virulent antisemitism, and vision of Aryan supremacy that would go on to fuel the Nazi regime and the horrors of World War II. Held in this archive as a primary historical document — a stark testament to how dangerous ideas, left unchecked, can reshape the world in catastrophic ways. Reader discretion is strongly advised."
@@ -128,8 +128,10 @@ function loadFromStorage() {
             const stored = books.find(b => b.id === def.id);
             const hasReservation = reservations.some(r => r.id === def.id);
             if (stored) {
-                // Restore stock if no reservation holds it
-                if (!hasReservation && (Number(stored.stock) < Number(def.stock))) {
+                // Restore stock if no reservation holds it. Also aggressively set stock to 0 if the database says it's 0.
+                if (Number(def.stock) === 0) {
+                    stored.stock = 0;
+                } else if (!hasReservation && (Number(stored.stock) < Number(def.stock))) {
                     stored.stock = Number(def.stock) || 0;
                 }
                 // Always forcefully sync static metadata from source (defaultBooks)
