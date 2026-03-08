@@ -140,6 +140,9 @@ function loadFromStorage() {
                 stored.summary = def.summary;
                 stored.image = def.image;
                 stored.genre = def.genre;
+            } else {
+                // If a new book was added to the code but isn't in localStorage yet, add it!
+                books.push({ ...def });
             }
         });
     } catch (e) {
