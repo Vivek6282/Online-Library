@@ -14,7 +14,7 @@ let books = [
         "id": 2,
         "title": "MEIN KAMPF",
         "author": "Adolf Hitler",
-        "stock": 1,
+        "stock": 0,
         "image": "img/adolfhitler.jpg",
         "genre": "Biography, History",
         "summary": "Written during Hitler's imprisonment in 1924, this autobiographical manifesto outlines his political ideology, virulent antisemitism, and vision of Aryan supremacy that would go on to fuel the Nazi regime and the horrors of World War II. Held in this archive as a primary historical document — a stark testament to how dangerous ideas, left unchecked, can reshape the world in catastrophic ways. Reader discretion is strongly advised."
