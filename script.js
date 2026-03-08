@@ -16,7 +16,7 @@ let books = [
         "author": "Adolf Hitler",
         "stock": 1,
         "image": "img/adolfhitler.jpg",
-        "genre": "History",
+        "genre": "Biography, History",
         "summary": "Written during Hitler's imprisonment in 1924, this autobiographical manifesto outlines his political ideology, virulent antisemitism, and vision of Aryan supremacy that would go on to fuel the Nazi regime and the horrors of World War II. Held in this archive as a primary historical document — a stark testament to how dangerous ideas, left unchecked, can reshape the world in catastrophic ways. Reader discretion is strongly advised."
     },
     {
@@ -45,6 +45,42 @@ let books = [
         "image": "img/Tesla.png",
         "genre": "Non-fiction",
         "summary": "A rare compendium of Nikola Tesla's own writings, patents, and lectures surrounding his most celebrated invention — the Tesla Coil. With characteristic visionary fervour, Tesla illuminates the principles of resonant transformer circuits and his grand dream of wireless energy transmission across continents. Essential reading for anyone wishing to understand the mind behind the modern electrical age."
+    },
+    {
+        "id": 6,
+        "title": "The Sound Between the Notes",
+        "author": "Barbara Linn Probst",
+        "stock": 7,
+        "image": "img/nehu2.jpg",
+        "genre": "Music",
+        "summary": "Story of a pianist who returns to music after many years but must confront a genetic illness and her hidden past while discovering her identity."
+    },
+    {
+        "id": 7,
+        "title": "The Diary of a Young Girl",
+        "author": "Anne Frank",
+        "stock": 4,
+        "image": "img/annfake.jpg",
+        "genre": "Biography",
+        "summary": "A Jewish teenager, Anne Frank, records her thoughts, fears, and hopes while hiding from Nazis during World War II."
+    },
+    {
+        "id": 8,
+        "title": "India and World Geography",
+        "author": "Majid Husain",
+        "stock": 6,
+        "image": "img/nehu3.jpg",
+        "genre": "Geography",
+        "summary": "This provides a clear overview of India's physical and human geography along with many other geographical features of the world specially for civil service aspirants."
+    },
+    {
+        "id": 9,
+        "title": "Jungle",
+        "author": "Yossi Ghinsberg",
+        "stock": 3,
+        "image": "img/nehu1.jpg",
+        "genre": "Survival Fiction",
+        "summary": "A backpacker becomes lost in the Amazon rainforest and must survive alone for weeks, facing extreme danger, fear, and the raw power of nature."
     }
 ];
 
@@ -96,11 +132,14 @@ function loadFromStorage() {
                 if (!hasReservation && (Number(stored.stock) < Number(def.stock))) {
                     stored.stock = Number(def.stock) || 0;
                 }
-                // Always sync metadata from source so new fields (e.g. summary)
-                // added after the user's localStorage was written are never missing
-                if (!stored.summary) stored.summary = def.summary;
-                if (!stored.image) stored.image = def.image;
-                if (!stored.genre) stored.genre = def.genre;
+                // Always forcefully sync static metadata from source (defaultBooks)
+                // This guarantees that if we update a book's genre, title, or image in the code,
+                // the user immediately sees it, rather than seeing stale cached localStorage data.
+                stored.title = def.title;
+                stored.author = def.author;
+                stored.summary = def.summary;
+                stored.image = def.image;
+                stored.genre = def.genre;
             }
         });
     } catch (e) {
@@ -231,7 +270,7 @@ function getSuggestions(keyword) {
     const genreSelect = document.getElementById('genreSelect');
     const selectedGenre = genreSelect ? genreSelect.value : 'All';
 
-    const pool = books.filter(b => selectedGenre === 'All' || (b.genre || '').toLowerCase() === selectedGenre.toLowerCase());
+    const pool = books.filter(b => selectedGenre === 'All' || (b.genre || '').toLowerCase().includes(selectedGenre.toLowerCase()));
 
     const kw = keyword.toLowerCase();
     const matches = pool.filter(b => (b.title || '').toLowerCase().includes(kw) || (b.author || '').toLowerCase().includes(kw));
@@ -914,7 +953,7 @@ function applyFilters() {
         const bookGenre = (book.genre || '').toLowerCase();
 
         const matchesKeyword = title.includes(keyword) || author.includes(keyword);
-        const matchesGenre = selectedGenre === 'All' || bookGenre === selectedGenre.toLowerCase();
+        const matchesGenre = selectedGenre === 'All' || bookGenre.includes(selectedGenre.toLowerCase());
 
         return matchesKeyword && matchesGenre;
     });
