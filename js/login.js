@@ -302,10 +302,11 @@
 
       // Store login state
       window.localStorage.setItem("isLoggedIn", "true");
+      window.localStorage.removeItem("isGuest");
 
       // Slight delay so the user can see the success message
       window.setTimeout(() => {
-        window.location.href = "library.html";
+        window.location.href = "index.html";
       }, 700);
     } catch (error) {
       // Network or JSON loading error: we inform the user clearly.
@@ -327,17 +328,22 @@
   // -------------------------------
 
   function setupPasswordToggle() {
-    if (!togglePasswordEl) return;
-    togglePasswordEl.addEventListener("click", () => {
-      const isHidden = passwordEl.type === "password";
-      passwordEl.type = isHidden ? "text" : "password";
+    const toggles = document.querySelectorAll(".toggle-password");
+    toggles.forEach(toggle => {
+      const input = toggle.parentElement.querySelector("input");
+      if (!input) return; // Ensure there's an associated input
 
-      // Update accessible label and pressed state for screen readers
-      togglePasswordEl.setAttribute(
-        "aria-label",
-        isHidden ? "Hide password" : "Show password"
-      );
-      togglePasswordEl.setAttribute("aria-pressed", String(isHidden));
+      toggle.addEventListener("click", () => {
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+
+        // Update accessible label and pressed state
+        toggle.setAttribute(
+          "aria-label",
+          isHidden ? "Hide password" : "Show password"
+        );
+        toggle.setAttribute("aria-pressed", String(isHidden));
+      });
     });
   }
 
@@ -360,14 +366,110 @@
     setupPasswordToggle();
     hydrateRememberedUser();
 
+    // --- 3D INTERACTIVE TILT (Card only) ---
+    // This tilts the login card in 3D with the mouse.
+    // The background images are intentionally NOT moved — they stay fixed.
+    document.addEventListener("mousemove", (e) => {
+      if (!loginCardEl) return;
+
+      const { clientY, clientX } = e;
+      const { innerWidth, innerHeight } = window;
+
+      // Calculate rotation based on mouse position
+      const xPos = (clientX / innerWidth) - 0.5;
+      const yPos = (clientY / innerHeight) - 0.5;
+
+      // Card 3D Tilt only — background stays static
+      const rotateY = xPos * 40;
+      const rotateX = -yPos * 40;
+      loginCardEl.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    // Reset rotation when mouse leaves the window (optional but feels cleaner)
+    document.addEventListener("mouseleave", () => {
+      if (loginCardEl) {
+        loginCardEl.style.transform = `rotateX(0deg) rotateY(0deg)`;
+      }
+    });
+
     // If we are currently locked out (e.g., from sessionStorage in the future),
     // we would re-apply the lock here. For now it is reset per page load.
   }
 
+  /**
+   * Signup Card Logic
+   */
+  function setupSignupFlow() {
+    const openSignupBtn = document.getElementById("open-signup");
+    const signupOverlay = document.getElementById("signup-overlay");
+    const signupForm = document.getElementById("signup-form");
+    const closeSignupBtn = document.getElementById("close-signup");
+
+    if (!openSignupBtn || !signupOverlay || !signupForm) return;
+
+    const showSignup = (e) => {
+      e.preventDefault();
+      signupOverlay.classList.add("is-visible");
+      signupOverlay.setAttribute("aria-hidden", "false");
+    };
+
+    const hideSignup = () => {
+      signupOverlay.classList.add("is-leaving");
+      signupOverlay.classList.remove("is-visible");
+
+      // Wait for animation to finish before resetting classes
+      setTimeout(() => {
+        signupOverlay.classList.remove("is-leaving");
+        signupOverlay.setAttribute("aria-hidden", "true");
+        signupForm.reset();
+      }, 500);
+    };
+
+    openSignupBtn.addEventListener("click", showSignup);
+    closeSignupBtn.addEventListener("click", hideSignup);
+
+    signupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      // Since it's a front-end assignment, we just show success and disappear
+      const registerBtn = document.getElementById("register-button");
+      registerBtn.innerHTML = "Success!";
+      registerBtn.style.background = "#4cd137";
+
+      setTimeout(() => {
+        hideSignup();
+        // Reset button after it closes
+        setTimeout(() => {
+          registerBtn.innerHTML = "Register";
+          registerBtn.style.background = "";
+        }, 600);
+      }, 800);
+    });
+
+    // Close on overlay click
+    signupOverlay.addEventListener("click", (e) => {
+      if (e.target === signupOverlay) hideSignup();
+    });
+
+    // --- GUEST MODE TRACKING ---
+    // This part watches for clicks on the 'Continue as Guest' link.
+    // If clicked, we save a 'guest' flag in the browser's memory so other pages know.
+    const guestLink = document.getElementById("guest-link");
+    if (guestLink) {
+      guestLink.addEventListener("click", () => {
+        window.localStorage.setItem("isGuest", "true"); // Remember this person is a guest
+        window.localStorage.removeItem("isLoggedIn"); // They are NOT a logged-in member
+      });
+    }
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
+      setupSignupFlow();
+    });
   } else {
     init();
+    setupSignupFlow();
   }
 })();
 

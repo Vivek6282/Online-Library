@@ -1,3 +1,5 @@
+// This file is the 'brain' of the library page. 
+// It keeps track of all the books and handles searching, filtering, and reserving books.
 let books = [
     {
         "id": 1,
@@ -159,6 +161,41 @@ updateStats();
 applyFilters();
 renderReservations();
 renderCartPanel();
+
+// --- HIGH-PERFORMANCE ENTRANCE MOTION ---
+// This function triggers the fancy 'reveal' animations when you enter the library.
+function triggerEntranceMotion() {
+    const body = document.querySelector('.library-body');
+    const reveals = document.querySelectorAll('.reveal-item');
+
+    if (body) {
+        void body.offsetWidth; // This forces the browser to refresh its layout
+        body.classList.add('is-ready'); // This slides up the dark 'shutter'
+    }
+
+    // This part makes each item (header, books, search) appear one by one
+    reveals.forEach((el, index) => {
+        setTimeout(() => {
+            el.classList.add('is-visible'); // Makes the item fade in and slide up
+        }, 300 + (index * 80)); // The delay increases for each item to create a sequence
+    });
+}
+
+// ── IMPORTANT FACTOR: requestAnimationFrame ──
+// When a page loads, if we tell the browser to animate immediately, it might
+// freeze because code is still running. 
+// "requestAnimationFrame" is a special browser function that waits until the 
+// perfect millisecond right before the screen redraws itself.
+// By nesting it twice, we guarantee the browser has finished painting everything 
+// (no freezing!) before we trigger the curtain to lift.
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            triggerEntranceMotion();
+        });
+    });
+});
 
 // Initialize Bootstrap components (if available)
 const reserveModalEl = document.getElementById('reserveModal');
@@ -372,8 +409,9 @@ function displayBooks() {
 
     container.innerHTML = ""; // Clear current view
 
-    // If no books match the current filters, just show nothing
+    // If no books match the current filters, show "No result found."
     if (!filteredBooks || filteredBooks.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center my-5 reveal-item is-visible"><h3 style="color: #c5a059;">No result found.</h3></div>';
         // still update pagination (will hide when 0 pages)
         createPagination();
         return;
@@ -385,7 +423,7 @@ function displayBooks() {
     // Loop through filtered/paginated books and create Bootstrap card HTML
     paginated.forEach(book => {
         const col = document.createElement('div');
-        col.className = 'col';
+        col.className = 'col reveal-item'; // Add reveal class for entry motion
 
         const card = document.createElement('div');
         card.className = 'card h-100';
@@ -452,6 +490,12 @@ function displayBooks() {
         img.style.cursor = 'pointer';
         img.title = 'Click to learn about this tome';
         img.addEventListener('click', () => showBookInfo(book));
+
+        // If page is already ready, show book immediately
+        // This is used for pagination—when you switch pages, books don't need a slow entrance
+        if (document.body.classList.contains('is-ready')) {
+            setTimeout(() => col.classList.add('is-visible'), 50);
+        }
     });
 
     createPagination();
@@ -888,9 +932,46 @@ function handleAuthAction() {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
     if (isLoggedIn) {
-        // Logout
+        // Logout Process
         localStorage.removeItem('isLoggedIn');
-        window.location.reload();
+
+        // --- VISUAL MOTION: LOGOUT NOTIFICATION ---
+        const card = document.createElement('div');
+        card.className = 'logout-notification-card';
+        card.innerHTML = `
+            <div class="logout-notification-header">
+                <span class="icon">📜</span>
+                <h4>Session Terminated</h4>
+            </div>
+            <div class="logout-notification-body">
+                You have been successfully logged out of The Grand Archive. Your artifacts and tattered scrolls are now secure.
+            </div>
+            <div class="logout-notification-footer">
+                Click to dismiss
+            </div>
+        `;
+        document.body.appendChild(card);
+
+        // Trigger animation
+        setTimeout(() => card.classList.add('show'), 50);
+
+        const dismiss = () => {
+            card.classList.add('fade-out');
+            setTimeout(() => {
+                if (card.parentNode) card.parentNode.removeChild(card);
+            }, 500);
+        };
+
+        // Interaction: Click to dismiss
+        card.addEventListener('click', dismiss);
+
+        // Auto-dismiss after 6 seconds
+        setTimeout(dismiss, 6000);
+
+        // Update UI state without hard reload for smoother feel
+        checkAuthStatus();
+        updateStats();
+        applyFilters();
     } else {
         window.location.href = 'login.html';
     }

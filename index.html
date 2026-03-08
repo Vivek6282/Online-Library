@@ -2,9 +2,13 @@
 <html>
 
 <head>
+    <!-- The title shown at the top of the browser tab -->
     <title>The Grand Archive</title>
+    <!-- Makes the page look good on phones and computers -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Loads Bootstrap for basic layout building blocks -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Our custom design choices -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,11 +22,12 @@
         <img src="img/thinker.jpg" alt="Thinker">
     </div>
 
+    <!-- Navigation bar at the top -->
     <nav class="navbar">
         <div class="container">
             <a class="navbar-brand" href="#">The Grand Archive</a>
-            <div class="ms-auto d-flex gap-3">
-                <a href="login.html" class="nav-btn" style="border-color: transparent;">Scholar Login</a>
+            <!-- This area will dynamically show buttons like 'Scholar Login' or 'Return to Login' -->
+            <div id="nav-actions" class="ms-auto d-flex gap-3">
             </div>
         </div>
     </nav>
@@ -32,7 +37,7 @@
             <div class="hero-content mx-auto text-center">
                 <h1>Welcome to the Grand Historical Archive</h1>
                 <p>"A sanctuary for the preservation of forbidden knowledge and classical arts."</p>
-                <a href="library.html" class="cta-btn">Begin Exploration</a>
+                <a href="library.html" id="begin-exploration" class="cta-btn">Begin Exploration</a>
             </div>
         </div>
     </section>
@@ -41,7 +46,10 @@
         <p>©The Archival Society</p>
     </footer>
 
+    <!-- Bootstrap logic for dropdowns and menus -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Our custom logic for the landing page entrance and exit motions -->
+    <script src="js/landing.js"></script>
 </body>
 
 </html>

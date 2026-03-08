@@ -59,12 +59,7 @@ h6 {
     letter-spacing: 2px;
 }
 
-/* 
- * ===== COLLAGE AESTHETIC ELEMENTS ===== 
- * Manages the background decoration layer containing the statues, vintage hands, 
- * and butterflies. These elements are positioned absolutely and isolated from 
- * the normal document flow to create a layered, scrapbook-like appearance.
- */
+/* These are decorative images like statues and butterflies that sit in the background */
 .collage-bg {
     position: fixed;
     top: 0;
@@ -131,7 +126,7 @@ body:hover .collage-butterfly {
     overflow: hidden;
 }
 
-/* Decorative Animated Statues */
+/* Controls the look of the big statues on the landing page */
 .landing-deco {
     position: absolute;
     z-index: 0;
@@ -150,7 +145,8 @@ body:hover .collage-butterfly {
 }
 
 .start-top {
-    top: -8vh;
+    top: 3vh;
+    /* Lowered further from -2vh */
     left: -3vw;
     animation: slideDown 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
         floatStatue 6s ease-in-out 2.2s infinite;
@@ -171,7 +167,8 @@ body:hover .collage-butterfly {
 
     100% {
         transform: translateY(0);
-        opacity: 1;
+        opacity: 0.5;
+        /* Defined transparency */
     }
 }
 
@@ -183,8 +180,32 @@ body:hover .collage-butterfly {
 
     100% {
         transform: translateY(0);
-        opacity: 1;
+        opacity: 0.5;
+        /* Defined transparency */
     }
+}
+
+/* Exit Animations */
+.start-top.is-exiting {
+    animation: none !important;
+    /* Kill the floating animation to allow horizontal slide */
+    transform: translateX(-100vw) !important;
+    opacity: 0 !important;
+    transition: all 1s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.start-bottom.is-exiting {
+    animation: none !important;
+    /* Kill the floating animation to allow horizontal slide */
+    transform: translateX(100vw) !important;
+    opacity: 0 !important;
+    transition: all 1s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.hero-content.is-exiting {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+    transition: all 0.8s ease;
 }
 
 @keyframes floatStatue {
@@ -378,6 +399,92 @@ body.landing .interactive-collage-bg {
     filter: brightness(0.45) sepia(0.2);
 }
 
+/* ===== HIGH-PERFORMANCE LIBRARY ENTRANCE MOTION ===== */
+.library-body {
+    background-color: #000;
+}
+
+/* 
+  1. Cinematic Shutter Reveal
+  This is the black overlay that slides up. We use "transform" instead of "top" 
+  because transform is processed by the computer's GPU, making the motion silky smooth and fast. 
+*/
+.shutter-reveal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #12100e;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translateY(0);
+    /* 
+      "cubic-bezier" is a math curve the browser uses to decide speed.
+      This specific curve (0.9, 0, 0.1, 1) means it starts slow, accelerates fast, and eases at the very end.
+    */
+    transition: transform 1.2s cubic-bezier(0.9, 0, 0.1, 1);
+}
+
+.library-body.is-ready .shutter-reveal {
+    /* Slide it 100% of its height upwards, revealing the page */
+    transform: translateY(-100%);
+}
+
+/* 
+  2. Reveal Items (staggered entry)
+  This controls how the header, search bar, and books "arrive" on the page. 
+  Initially, they are invisible (opacity 0), pushed down (translateY 40px), shrunk (scale 0.95), and blurry.
+*/
+.reveal-item {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    filter: blur(10px);
+    /* 
+      This transition uses a different cubic-bezier curve that 'overshoots' value 1.
+      This creates a physical, bouncy 'spring' effect when the items land in place.
+    */
+    transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.reveal-item.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+/* Staggered Precision Delays */
+.delay-1 {
+    transition-delay: 0.1s;
+}
+
+.delay-2 {
+    transition-delay: 0.2s;
+}
+
+.delay-3 {
+    transition-delay: 0.3s;
+}
+
+.delay-4 {
+    transition-delay: 0.4s;
+}
+
+.delay-5 {
+    transition-delay: 0.5s;
+}
+
+/* Background zoom-in effect */
+.interactive-collage-bg {
+    transform: scale(1.3);
+    transition: transform 2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 1s ease;
+}
+
+.library-body.is-ready .interactive-collage-bg {
+    transform: scale(1.05);
+    /* Settles into place */
+}
+
 /* ===== 3-TIER ARCHIVAL HEADER ===== */
 .library-header {
     position: sticky;
@@ -447,13 +554,22 @@ body.landing .interactive-collage-bg {
 .archival-main-title {
     font-size: clamp(1.5rem, 5vw, 2.8rem);
     margin: 0;
-    padding: 10px 0;
-    letter-spacing: clamp(4px, 1.5vw, 10px);
+    padding: 8px 0;
+    letter-spacing: clamp(2px, 1.5vw, 10px);
     font-weight: 700;
     color: var(--accent-gold);
     text-transform: uppercase;
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
-    transition: font-size 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .archival-main-title {
+        padding: 2px 0;
+        letter-spacing: 1px;
+        font-size: 1.5rem;
+        /* Smaller size on mobile */
+    }
 }
 
 /* Tier 3: Controls Row */
@@ -466,6 +582,16 @@ body.landing .interactive-collage-bg {
     height: 48px !important;
     border-radius: 4px !important;
     font-size: 1rem !important;
+}
+
+@media (max-width: 768px) {
+
+    .archival-select-sm,
+    .archival-input-sm {
+        height: 44px !important;
+        /* Shorter inputs on mobile */
+        font-size: 0.9rem !important;
+    }
 }
 
 .archival-select-sm:focus,
@@ -550,19 +676,35 @@ body.landing .interactive-collage-bg {
     .social-row-archival {
         border-right: none;
         padding-right: 0;
-        margin-bottom: 5px;
+        margin-bottom: 0px;
     }
 
     .header-tier-bottom .row {
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        /* Allow wrapping on extremely narrow screens to prevent disconnect */
+        justify-content: center;
+        gap: 8px;
     }
 
+    .header-tier-bottom .col-6 {
+        flex: 1 1 45% !important;
+        /* Equal balance, allowing slight gap */
+        min-width: 0;
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    /* Wrap the social row to the next line */
     .header-tier-bottom .col-12 {
-        width: 100%;
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        margin-top: 10px;
     }
 
     .search-input-group-archival {
-        margin: 10px 0;
+        margin: 0;
     }
 }
 
@@ -628,13 +770,7 @@ footer {
 
 /* ===== PAGE SECTIONS & UI BLOCKS ===== */
 
-.library-header h1 {
-    font-size: 2.4rem;
-    margin-bottom: 20px;
-    margin-top: 0;
-    letter-spacing: 6px;
-    font-weight: 700;
-}
+/* Consolidated with .archival-main-title */
 
 .header-controls {
     display: flex;
@@ -659,6 +795,13 @@ footer {
     border-radius: 6px;
     font-size: 1rem;
     min-width: 180px;
+}
+
+@media (max-width: 768px) {
+    .search-controls select {
+        min-width: 0 !important;
+        /* Allow shrinking on mobile */
+    }
 }
 
 .search-wrap {
@@ -1750,11 +1893,11 @@ img {
 .header-search .search-controls select {
     flex: none !important;
     display: block !important;
-    width: auto !important;
+    width: 170px !important;
     box-sizing: border-box !important;
 
     /* Typography & Sizing */
-    font-size: 22px !important;
+    font-size: 18px !important;
     /* Better for mobile zoom prevention */
     height: 44px !important;
     /* Slightly taller for better touch targets */
@@ -2346,4 +2489,174 @@ main.container {
     padding-right: 35px !important;
     min-width: 160px;
     background-position: right 12px center;
+}
+
+@media (max-width: 768px) {
+    #genreSelect {
+        min-width: 0 !important;
+        /* Allow shrinking on mobile to fit side-by-side */
+    }
+}
+
+/* adjust the size of the image inside the summary card*/
+.info-cover-img {
+    width: 150px;
+    height: 220px;
+    object-fit: cover;
+    filter: sepia(0.2) contrast(1.1) brightness(0.95);
+    box-shadow: rgba(0, 0, 0, 0.7) 6px 6px 20px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgba(197, 160, 89, 0.4);
+    border-image: initial;
+    border-radius: 2px;
+    transition: filter 0.4s;
+
+
+}
+
+/* ===== LOGOUT NOTIFICATION CARD ===== */
+.logout-notification-card {
+    position: fixed;
+    top: 20px;
+    right: -400px;
+    /* Hidden initially */
+    width: 350px;
+    background: var(--bg-parchment);
+    border: 2px solid var(--accent-gold);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(197, 160, 89, 0.2);
+    z-index: 9999;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.logout-notification-card.show {
+    transform: translateX(-420px);
+    /* Slide in */
+}
+
+.logout-notification-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--accent-crimson);
+}
+
+.logout-notification-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logout-notification-header .icon {
+    font-size: 1.5rem;
+    color: var(--accent-crimson);
+}
+
+.logout-notification-header h4 {
+    margin: 0;
+    font-family: var(--font-heading);
+    color: var(--text-dark);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.logout-notification-body {
+    font-family: var(--font-mono);
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.logout-notification-footer {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: right;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.logout-notification-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(197, 160, 89, 0.4);
+    transform: translateX(-425px) scale(1.02);
+}
+
+.logout-notification-card:active {
+    transform: translateX(-420px) scale(0.98);
+}
+
+/* Animations for interaction */
+@keyframes fadeOutNotification {
+    to {
+        opacity: 0;
+        transform: translateX(-420px) translateY(-20px) scale(0.95);
+    }
+}
+
+.logout-notification-card.fade-out {
+    animation: fadeOutNotification 0.5s forwards ease-in;
+}
+
+/* Signup Hint on Login Page */
+.signup-hint {
+    text-align: center;
+    margin-top: 15px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.signup-hint a {
+    color: maroon;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.signup-hint a:hover {
+    color: #5e0000;
+    /* Darker maroon on hover */
+    text-decoration: underline;
+}
+
+/* ===== LIBRARY PAGE: GOLD INK CLICK RIPPLE ===== */
+/* A glowing gold ring that expands from wherever you click.
+   Injected via JS in library-interactions.js. */
+.click-ripple {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: radial-gradient(circle, rgba(255, 220, 140, 0.7) 0%, rgba(197, 160, 89, 0.3) 50%, transparent 80%);
+    pointer-events: none;
+    z-index: 99997;
+    animation: rippleExpand 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes rippleExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+
+    60% {
+        transform: translate(-50%, -50%) scale(28);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(40);
+        opacity: 0;
+    }
 }

@@ -34,10 +34,6 @@
       <!-- Decorative heading area inspired by museum-style layout -->
       <section class="intro" aria-label="Library philosophy">
         <h1 class="intro-title">A Place Where Stories Awaken</h1>
-        <p class="intro-subtitle">
-          Enter the library pavilion to unlock curated collections of
-          knowledge, art, and imagination.
-        </p>
       </section>
 
       <!-- Accessible login section -->
@@ -45,7 +41,7 @@
         <!-- Login card with glassmorphism and golden frame styling -->
         <div class="login-card" role="form">
           <header class="login-header">
-            <h2 id="login-heading" class="login-title">Curator Login</h2>
+            <h2 id="login-heading" class="login-title">Archive Login</h2>
             <p id="login-description" class="login-description">
               Authenticate to continue your journey through the virtual
               stacks.
@@ -86,13 +82,12 @@
                 <span class="checkbox-text">Remember me on this device</span>
               </label>
 
-              <!-- Small helper text to suggest keyboard support -->
-              <p class="helper-text">Press Enter to login</p>
+
             </div>
 
             <!-- Login button with spinner and subtle interaction effects -->
             <button type="submit" id="login-button" class="btn-login" aria-disabled="false">
-              <span class="btn-label">Enter Pavilion</span>
+              <span class="btn-label">Login</span>
               <!-- Spinner shown while AJAX request is active -->
               <span class="btn-spinner" aria-hidden="true" hidden></span>
             </button>
@@ -100,7 +95,11 @@
             <!-- Guest bypass link -->
             <div class="guest-bypass">
               <span class="divider-text">or</span>
-              <a href="library.html" class="link-guest">Continue as Guest</a>
+              <a href="index.html" id="guest-link" class="link-guest">Continue as Guest</a>
+            </div>
+
+            <div class="signup-hint">
+              <p>New Around here? <a href="#" id="open-signup">Sign up</a></p>
             </div>
 
             <!-- Hint text for lockout feedback -->
@@ -108,12 +107,86 @@
           </form>
         </div>
       </section>
+
+      <!-- Signup Modal Overlay (Hidden by default) -->
+      <section id="signup-overlay" class="signup-overlay" aria-hidden="true">
+        <div class="signup-card">
+          <header class="signup-header">
+            <h2 class="signup-title">Join the Pavilion</h2>
+            <p class="signup-description">Enter your email to begin your journey as a curator.</p>
+          </header>
+
+          <form id="signup-form">
+            <div class="form-group">
+              <label for="signup-name" class="form-label">Full Name</label>
+              <div class="input-wrapper">
+                <input type="text" id="signup-name" class="form-input" placeholder="E.g. Leonardo da Vinci" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-email" class="form-label">Email Address</label>
+              <div class="input-wrapper">
+                <input type="email" id="signup-email" class="form-input" placeholder=" E.g. abc123@gmail.com"
+                  required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-password" class="form-label">Password</label>
+              <div class="input-wrapper input-wrapper--password">
+                <input type="password" id="signup-password" class="form-input" placeholder="Create a strong password"
+                  required />
+                <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
+                  👁
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="signup-remember" class="checkbox-input" />
+                <span class="checkbox-text">Remember me</span>
+              </label>
+            </div>
+
+            <button type="submit" id="register-button" class="btn-login">
+              <span class="btn-label">Register</span>
+            </button>
+
+            <button type="button" id="close-signup" class="link-guest"
+              style="background:none; border:none; margin-top: 1rem; width: 100%; cursor: pointer;">
+              Return to Login
+            </button>
+          </form>
+        </div>
+      </section>
     </main>
   </div>
 
-  <!-- JavaScript: background first, then login logic; both loaded with defer to avoid blocking HTML parsing -->
+  <!-- 
+    === JAVASCRIPT FILES === 
+    These files control the logic and visual motion. They are loaded at the bottom 
+    with the "defer" attribute so they don't block the HTML from appearing first.
+
+    IMPORTANT FACTORS FOR MOTION:
+    1. HTML Canvas (used in galaxy.js and login-atmosphere.js for particles)
+    2. requestAnimationFrame (a browser tool that runs code 60 times a second for smooth animation)
+    3. CSS Transforms (used in login.js to tilt the card with your mouse)
+  -->
+
+  <!-- Background image slider -->
   <script src="js/slider.js" defer></script>
+
+  <!-- Main login logic and 3D card tilt -->
   <script src="js/login.js" defer></script>
+
+  <!-- Deep Space Canvas: Renders the rotating galaxies and stars behind everything -->
+  <script src="js/galaxy.js" defer></script>
+
+  <!-- Atmospheric Polish: Adds the mouse glow, dust motes, and magnetic button pull -->
+  <script src="js/login-atmosphere.js" defer></script>
 </body>
+
 
 </html>

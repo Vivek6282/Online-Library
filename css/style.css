@@ -4,21 +4,35 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Courier+Prime&display=swap');
 
+/* These are the core theme colors and fonts used in the login page */
 :root {
   --bg-dark: #12100e;
+  /* Very dark background */
   --bg-paper: #2a241f;
+  /* Dark brownish paper color */
   --bg-parchment: #e8dcca;
+  /* Light yellowish paper color */
   --text-primary: #d4c5b0;
+  /* Light beige text */
   --text-secondary: #a39178;
+  /* Muted brown text */
   --text-dark: #2c241b;
+  /* Dark text for light backgrounds */
   --accent-gold: #c5a059;
+  /* Elegant gold for highlights */
   --accent-gold-hover: #e0bb75;
+  /* Lighter gold when you hover */
   --accent-crimson: #6b2d28;
+  /* Deep red for important buttons */
   --accent-crimson-hover: #863a34;
+  /* Lighter red when you hover */
 
   --font-heading: 'Cinzel', serif;
+  /* Ornate serif for titles */
   --font-body: 'Cormorant Garamond', serif;
+  /* Classic serif for body text */
   --font-mono: 'Courier Prime', monospace;
+  /* Typewriter style for inputs */
 
   --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.8);
   --border-ornate: 1px solid rgba(197, 160, 89, 0.3);
@@ -51,6 +65,7 @@ body {
 /* Removed Branded Header Styles */
 
 /* Collage elements from library theme */
+/* This layer holds the decorative images fixed in the background */
 .collage-bg {
   position: fixed;
   top: 0;
@@ -59,13 +74,16 @@ body {
   height: 100vh;
   overflow: hidden;
   z-index: -1;
+  /* Puts it behind everything else */
   pointer-events: none;
+  /* Mouse clicks pass through it */
 }
 
 .collage-item {
   position: absolute;
   mix-blend-mode: multiply;
-  filter: contrast(1.1) sepia(0.6) opacity(0.6);
+  filter: contrast(1.1) sepia(0.6) opacity(0.5);
+  /* Increased base visibility */
 }
 
 .collage-statue {
@@ -73,6 +91,8 @@ body {
   left: -5vw;
   width: clamp(200px, 40vw, 450px);
   transform: rotate(-5deg);
+  opacity: 0.45;
+  /* Clearly visible statue */
 }
 
 .collage-hands {
@@ -80,6 +100,8 @@ body {
   right: -10vw;
   width: clamp(300px, 50vw, 600px);
   transform: rotate(10deg);
+  filter: contrast(1.1) sepia(0.6) opacity(0.175);
+  /* Precisely 17.5% visibility */
 }
 
 .collage-butterfly {
@@ -88,8 +110,10 @@ body {
   width: clamp(150px, 25vw, 300px);
   transform: rotate(-15deg);
   opacity: 0.4;
+  /* Visible butterfly decoration */
 }
 
+/* Main container for the whole screen */
 .page {
   position: relative;
   min-height: 100vh;
@@ -97,6 +121,10 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  perspective: 1500px;
+  /* Essential for 3D depth effects */
+  z-index: 2;
+  /* Sits above the canvas dust layer (z=1) and glow (z=0) */
 }
 
 .main {
@@ -136,14 +164,70 @@ body {
   max-width: 480px;
 }
 
+/* The main login box with the blur effect and golden border */
+/* Added 3D entrance and smooth transition for tilting */
 .login-card {
   position: relative;
   padding: 2.5rem;
   border-radius: 4px;
   background: rgba(30, 26, 22, 0.75);
+  /* Semi-transparent dark box */
   backdrop-filter: blur(12px);
+  /* Makes the background behind the card blurry */
   border: 2px solid rgba(197, 160, 89, 0.3);
+  /* Subtle gold border */
   box-shadow: var(--shadow-deep);
+  overflow: hidden;
+  /* Keeps the shimmer sweep clipped inside the card */
+
+  /* 3D Entrance Animation */
+  animation: entrance3D 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+  /* Smooth tilt transitions */
+}
+
+/* Keyframes for the 'swinging vault door' 3D entrance */
+@keyframes entrance3D {
+  0% {
+    opacity: 0;
+    transform: rotateX(-30deg) rotateY(20deg) translateZ(-200px) translateY(50px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg) rotateY(0deg) translateZ(0) translateY(0);
+  }
+}
+
+/* Gold shimmer sweep — a single flash of light across the card after it arrives */
+.shimmer-sweep {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(105deg,
+      transparent 35%,
+      rgba(197, 160, 89, 0.07) 48%,
+      rgba(255, 220, 140, 0.18) 53%,
+      rgba(197, 160, 89, 0.07) 58%,
+      transparent 72%);
+  pointer-events: none;
+  z-index: 20;
+  /* Triggers once after the 3D entrance finishes */
+  animation: shimmerSweep 1.2s ease-out 1.3s forwards;
+}
+
+@keyframes shimmerSweep {
+  0% {
+    left: -60%;
+  }
+
+  100% {
+    left: 130%;
+  }
 }
 
 .login-card::before {
@@ -360,6 +444,30 @@ body {
   transform-origin: left;
 }
 
+/* Signup hint below the login form */
+.signup-hint {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.signup-hint p {
+  margin: 0;
+}
+
+.signup-hint a {
+  color: #c5a059;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.25s ease;
+}
+
+.signup-hint a:hover {
+  color: var(--accent-gold-hover);
+  text-decoration: underline;
+}
+
 .btn-login:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -416,6 +524,81 @@ body {
   }
 
   .login-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Signup Overlay & Card Styles */
+/* The dark background behind the signup card that appears when you click Register */
+.signup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(18, 16, 14, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  /* Hidden by default */
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Smooth fade-in */
+}
+
+.signup-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2.5rem;
+  background: rgba(30, 26, 22, 0.9);
+  backdrop-filter: blur(15px);
+  border: 2px solid var(--accent-gold);
+  border-radius: 4px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+  transform: translateY(30px) scale(0.95);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.signup-overlay.is-visible .signup-card {
+  transform: translateY(0) scale(1);
+}
+
+/* Exit animation state */
+.signup-overlay.is-leaving .signup-card {
+  transform: translateY(-30px) scale(0.95);
+  opacity: 0;
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.signup-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: var(--accent-gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.signup-description {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+@media (max-width: 480px) {
+  .signup-card {
+    width: 90%;
     padding: 1.5rem;
   }
 }
