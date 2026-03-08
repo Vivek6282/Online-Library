@@ -428,10 +428,24 @@ function displayBooks() {
         const card = document.createElement('div');
         card.className = 'card h-100';
 
+        // Use a medium, proportional size so book covers remain fully visible
+        const imgContainer = document.createElement('div');
+        imgContainer.style.height = '240px';
+        imgContainer.style.backgroundColor = '#12100e'; // Dark background in case image doesn't perfectly fit
+        imgContainer.style.overflow = 'hidden';
+        imgContainer.style.display = 'flex';
+        imgContainer.style.alignItems = 'center';
+        imgContainer.style.justifyContent = 'center';
+
         const img = document.createElement('img');
-        img.className = 'card-img-top';
+        img.className = 'card-img-top w-100 h-100';
+        img.style.objectFit = 'contain'; // Changed to 'contain' so nothing is cropped out
+        img.style.padding = '10px'; // Adds a bit of breathing room around the book cover
         img.src = book.image || 'img/placeholder.jpg';
         img.alt = book.title;
+
+        // Group the image inside the restricted container
+        imgContainer.appendChild(img);
 
         const body = document.createElement('div');
         body.className = 'card-body d-flex flex-column';
@@ -481,13 +495,19 @@ function displayBooks() {
         footer.appendChild(btn);
         body.appendChild(footer);
 
-        card.appendChild(img);
+        // Assemble with the restricted-height image container
+        card.appendChild(imgContainer);
         card.appendChild(body);
+
+        // Add horizontal padding directly to the card to make it smaller inside the grid column
+        card.style.margin = '0 auto';
+        card.style.maxWidth = '85%';
+
         col.appendChild(card);
         container.appendChild(col);
 
         // Make the cover image open the summary modal on click
-        img.style.cursor = 'pointer';
+        imgContainer.style.cursor = 'pointer';
         img.title = 'Click to learn about this tome';
         img.addEventListener('click', () => showBookInfo(book));
 
