@@ -1,3 +1,5 @@
+// This script creates the "Atmosphere" on the login page.
+// It adds floating dust particles and makes the background glow where your mouse is.
 /**
  * login-atmosphere.js
  * =====================================================================

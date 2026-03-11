@@ -1,45 +1,52 @@
-// Redundant hardcoded data removed. Library state is now managed by api.php.
+// This script handles all the "Brain" work for the library page.
+// It loads books from the server, filters them, and handles reservations.
+
+// These are keys we use to save small bits of data (like your reservations) in your browser.
 const STORAGE_KEY = 'library_books_v1';
 const RESERVED_KEY = 'library_reserved_v1';
 const RESERVATIONS_KEY = 'library_reservations_v1';
 
+/**
+ * Function: loadFromStorage
+ * Purpose: When you open the page, this looks for any saved reservations in your browser.
+ */
 function loadFromStorage() {
     try {
         const rawRes = localStorage.getItem(RESERVATIONS_KEY);
         reservations = rawRes ? JSON.parse(rawRes) : [];
+        
         const rawCount = localStorage.getItem(RESERVED_KEY);
         reservedCount = rawCount ? Number(rawCount) : 0;
 
-        // MIGRATION: Check if there are local books to sync to the server (from previous client-side only version)
+        // MIGRATION: If you had books saved in an old version, this sends them to the server.
         const localBooks = localStorage.getItem(STORAGE_KEY);
         if (localBooks) {
             const parsed = JSON.parse(localBooks);
             if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-                // Send them to server once to ensure no data loss during transition
                 const xhr = new XMLHttpRequest();
-                xhr.open("POST", "api.php?action=save", false); // Synchronous migration to ensure data is safe before fetching
+                xhr.open("POST", "api.php?action=save", false); 
                 xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
                 xhr.send(JSON.stringify({
                     books: parsed,
                     reservations: reservations,
                     reservedCount: reservedCount
                 }));
-                // Clear local books after successful migration
                 localStorage.removeItem(STORAGE_KEY);
             }
         }
     } catch (e) {
-        console.warn("Migration or load failed", e);
+        console.warn("Could not load saved data", e);
         reservations = [];
         reservedCount = 0;
     }
 
-    // Initial fetch from server
+    // After checking local data, we go get the latest books from the server
     fetchLibraryData();
 }
 
 /**
- * AJAX CONVERSION: Centralized function to fetch paginated and filtered data from the backend.
+ * Function: fetchLibraryData
+ * Purpose: Asks the server (api.php) for the list of books based on your search or filters.
  */
 function fetchLibraryData() {
     const searchInput = document.getElementById('searchInput');
@@ -47,6 +54,7 @@ function fetchLibraryData() {
     const keyword = searchInput ? searchInput.value.trim() : '';
     const selectedGenre = genreSelect ? genreSelect.value : 'All';
 
+    // We build a list of instructions for the server (What page? What genre? What keyword?)
     const params = new URLSearchParams({
         action: 'load',
         page: currentPage,
@@ -55,6 +63,7 @@ function fetchLibraryData() {
         genre: selectedGenre
     });
 
+    // We use AJAX (XMLHttpRequest) to talk to the server without refreshing the page.
     const xhr = new XMLHttpRequest();
     xhr.open("GET", `api.php?${params.toString()}`, true);
     xhr.onreadystatechange = function () {
@@ -63,90 +72,81 @@ function fetchLibraryData() {
                 try {
                     const serverData = JSON.parse(xhr.responseText);
                     if (serverData.books && Array.isArray(serverData.books)) {
-                        // Update global state with server response
+                        // We update our local list of books with what the server sent back
                         filteredBooks = serverData.books;
                         totalBooks = serverData.totalBooks || 0;
                         reservations = serverData.reservations || [];
                         reservedCount = serverData.reservedCount || 0;
 
-                        // Re-render UI
+                        // Now we redraw the page with the new info
                         displayBooks();
                         updateStats();
                         renderReservations();
                         renderCartPanel();
                     }
                 } catch (error) {
-                    console.warn("Error parsing AJAX server data", error);
+                    console.warn("Error reading server data", error);
                 }
-            } else {
-                console.error("Failed to load library data from server. Status:", xhr.status);
             }
         }
     };
     xhr.send();
 }
 
-
+/**
+ * Function: saveToStorage
+ * Purpose: Saves your current reservations to your browser's memory.
+ */
 function saveToStorage() {
     try {
         localStorage.setItem(RESERVED_KEY, String(reservedCount));
         localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations));
     } catch (e) {
-        console.warn('Could not save to localStorage', e);
+        console.warn('Could not save to browser memory', e);
     }
 
-    // AJAX CONVERSION: Send data to a backend server to persist library state
+    // We also tell the server about your changes
     const xhr = new XMLHttpRequest();
-    // FIX: Point to the centralized PHP backend
     xhr.open("POST", "api.php?action=save", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    // FIX: Handle response to verify persistence
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status !== 200) {
-            console.error("AJAX Save Failed: Server returned status " + xhr.status);
-        }
-    };
     xhr.send(JSON.stringify({
-        books: filteredBooks, // Note: server should handle merging or direct save
+        books: filteredBooks,
         reservations: reservations,
         reservedCount: reservedCount
     }));
 }
 
-
+// These are the genres available in our archive
 const genres = [
-    "Biography",
-    "Fantasy",
-    "Geography",
-    "History",
-    "Language",
-    "Music",
-    "Non-fiction",
-    "Survival fiction"
+    "Biography", "Fantasy", "Geography", "History", 
+    "Language", "Music", "Non-fiction", "Survival fiction"
 ];
 
+// Global variables to keep track of the current state
 let filteredBooks = [];
 let totalBooks = 0;
 let currentPage = 1;
 let booksPerPage = 6;
 let reservedCount = 0;
-let reservations = []; // {id, title, days, dueDate}
+let reservations = []; 
 let pendingReserveId = null;
 
-// Populate the genre dropdown and initialize the page
+/**
+ * Function: populateGenreSelect
+ * Purpose: Puts the list of genres into the dropdown menu so you can pick one.
+ */
 function populateGenreSelect() {
     const select = document.getElementById('genreSelect');
     if (!select) return;
 
-    // Start with All option
     select.innerHTML = '<option value="All">All Genres</option>' +
         genres.map(g => `<option value="${g}">${g}</option>`).join('');
 
-    // When genre changes, re-apply filters
+    // When you change the genre, the list of books updates automatically
     select.addEventListener('change', applyFilters);
 }
 
-// Initialize the page (load persisted data first)
+// Initialize the page (load all data and setup the dropdown)
 loadFromStorage();
 populateGenreSelect();
 updateStats();
@@ -154,25 +154,30 @@ applyFilters();
 renderReservations();
 renderCartPanel();
 
-// --- HIGH-PERFORMANCE ENTRANCE MOTION ---
-// This function triggers the fancy 'reveal' animations when you enter the library.
+// --- THE ENTRANCE REVEAL ---
+/**
+ * Function: triggerEntranceMotion
+ * Purpose: Makes the library page appear smoothly when you first open it.
+ */
 function triggerEntranceMotion() {
     const body = document.querySelector('.library-body');
     const reveals = document.querySelectorAll('.reveal-item');
 
     if (body) {
-        void body.offsetWidth; // This forces the browser to refresh its layout
-        body.classList.add('is-ready'); // This slides up the dark 'shutter'
+        // We tell the browser to slide the dark shutter up
+        void body.offsetWidth; 
+        body.classList.add('is-ready'); 
     }
 
-    // This part makes each item (header, books, search) appear one by one
+    // We make each part of the page (search bar, header, books) fade in one by one
     reveals.forEach((el, index) => {
         setTimeout(() => {
-            el.classList.add('is-visible'); // Makes the item fade in and slide up
-        }, 300 + (index * 80)); // The delay increases for each item to create a sequence
+            el.classList.add('is-visible'); 
+        }, 300 + (index * 80)); 
     });
 }
 
+// When the page finishes loading, we start the animations and check if you are logged in
 document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -183,8 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * ADAPTATION: Updates the UI based on authentication status and user role.
- * Adds 'Admin Dashboard' and 'Logout' buttons if applicable.
+ * Function: updateAuthUI
+ * Purpose: Looks at your login status and adds buttons like "Admin Dashboard" if you are an admin.
  */
 function updateAuthUI() {
     const authBtn = document.getElementById('authBtn');
@@ -195,16 +200,17 @@ function updateAuthUI() {
     const userName = localStorage.getItem('userName') || 'Member';
 
     if (isLoggedIn) {
+        // If logged in, show "Logout"
         authBtn.innerText = 'Logout';
         authBtn.onclick = logout;
 
-        // If admin, add a Dashboard button next to Logout
+        // If you are an admin, we add a special "Admin Dashboard" button
         if (userRole === 'admin') {
             let adminBtn = document.getElementById('adminDashBtn');
             if (!adminBtn) {
                 adminBtn = document.createElement('button');
                 adminBtn.id = 'adminDashBtn';
-                adminBtn.className = 'btn btn-archival-logout me-2'; // Reuse the archival style
+                adminBtn.className = 'btn btn-archival-logout me-2';
                 adminBtn.style.borderColor = '#c5a059';
                 adminBtn.style.color = '#c5a059';
                 adminBtn.innerText = 'Admin Dashboard';
@@ -213,7 +219,7 @@ function updateAuthUI() {
             }
         }
         
-        // Update totalBooks or stats with a welcome message
+        // Show a "Welcome" message with your name
         const totalBooksSpan = document.getElementById('totalBooks');
         if (totalBooksSpan && !totalBooksSpan.dataset.greetingSet) {
             const greeting = document.createElement('span');
@@ -225,51 +231,57 @@ function updateAuthUI() {
             totalBooksSpan.dataset.greetingSet = "true";
         }
     } else {
+        // If not logged in, show "Login"
         authBtn.innerText = 'Login';
         authBtn.onclick = () => window.location.href = 'login.html';
     }
 }
 
+/**
+ * Function: logout
+ * Purpose: Clears all your saved browser data and takes you to the login page.
+ */
 function logout() {
     localStorage.clear();
     window.location.href = 'login.html';
 }
 
-// Initialize Bootstrap components (if available)
+// These blocks connect the "Pop-up" boxes in the HTML to the JavaScript logic
 const reserveModalEl = document.getElementById('reserveModal');
 const confirmModalEl = document.getElementById('confirmModal');
 const cartPanelEl = document.getElementById('cartPanel');
 let bootstrapReserveModal = null;
 let bootstrapConfirmModal = null;
 let bootstrapCartOffcanvas = null;
+
 if (window.bootstrap) {
     try {
         if (reserveModalEl) bootstrapReserveModal = new bootstrap.Modal(reserveModalEl);
         if (confirmModalEl) bootstrapConfirmModal = new bootstrap.Modal(confirmModalEl);
         if (cartPanelEl) bootstrapCartOffcanvas = new bootstrap.Offcanvas(cartPanelEl);
-    } catch (e) {
-        // ignore bootstrap initialization errors
-    }
+    } catch (e) { /* ignore */ }
 }
 
-
-// Live search as the user types
+// Searches for books as you type in the search bar
 document.addEventListener("keyup", function (e) {
     if (e.target.id === "searchInput") {
         applyFilters();
     }
 });
 
-// Autocomplete / suggestions
+// --- SEARCH SUGGESTIONS (Autocomplete) ---
 let suggestionIndex = -1;
 const MAX_SUGGESTIONS = 8;
 
+/**
+ * Function: getSuggestions
+ * Purpose: Asks the server for book names that match what you are typing.
+ */
 function getSuggestions(keyword) {
     if (!keyword) return [];
     const kw = keyword.toLowerCase();
     const xhr = new XMLHttpRequest();
-    // For suggestions, we could use a separate action or just search with a limit
-    xhr.open("GET", `api.php?action=load&q=${encodeURIComponent(kw)}&limit=${MAX_SUGGESTIONS}`, false); // Synchronous for simplicity in current flow
+    xhr.open("GET", `api.php?action=load&q=${encodeURIComponent(kw)}&limit=${MAX_SUGGESTIONS}`, false); 
     xhr.send();
     if (xhr.status === 200) {
         const data = JSON.parse(xhr.responseText);
@@ -278,6 +290,10 @@ function getSuggestions(keyword) {
     return [];
 }
 
+/**
+ * Function: updateSuggestions
+ * Purpose: Shows a list of book names under the search bar as you type.
+ */
 function updateSuggestions() {
     const input = document.getElementById('searchInput');
     const list = document.getElementById('suggestions');
@@ -291,28 +307,23 @@ function updateSuggestions() {
 
     if (!keyword) {
         list.hidden = true;
-        list.setAttribute('aria-hidden', 'true');
         return;
     }
 
     if (matches.length === 0) {
         const li = document.createElement('li');
         li.className = 'no-result';
-        li.innerText = 'No records found in the Archive';
-        li.setAttribute('aria-selected', 'false');
+        li.innerText = 'No records found';
         list.appendChild(li);
         list.hidden = false;
-        list.setAttribute('aria-hidden', 'false');
         return;
     }
 
+    // Add each matching book to the suggestion list
     matches.forEach((b, idx) => {
         const li = document.createElement('li');
         li.innerText = `${b.title} — ${b.author}`;
-        li.setAttribute('role', 'option');
-        li.setAttribute('data-id', String(b.id));
-        li.setAttribute('aria-selected', 'false');
-        li.addEventListener('mousedown', function (ev) {
+        li.addEventListener('mousedown', (ev) => {
             ev.preventDefault();
             selectSuggestion(idx);
         });
@@ -320,31 +331,26 @@ function updateSuggestions() {
     });
 
     list.hidden = false;
-    list.setAttribute('aria-hidden', 'false');
 }
 
-function hideSuggestionsSoon() {
-    setTimeout(() => {
-        const list = document.getElementById('suggestions');
-        if (list) list.hidden = true;
-    }, 150);
-}
-
+/**
+ * Function: selectSuggestion
+ * Purpose: When you click a suggestion, it fills the search bar for you.
+ */
 function selectSuggestion(idx) {
     const list = document.getElementById('suggestions');
     if (!list) return;
     const item = list.children[idx];
     if (!item) return;
 
-    const text = item.innerText || '';
     const input = document.getElementById('searchInput');
-    input.value = text.split(' — ')[0] || text;
+    input.value = item.innerText.split(' — ')[0];
     applyFilters();
     list.hidden = true;
 }
 
-// keyboard navigation
-document.addEventListener('keydown', function (e) {
+// Handles pressing Enter or Up/Down arrows in the search suggestions
+document.addEventListener('keydown', (e) => {
     const input = document.getElementById('searchInput');
     const list = document.getElementById('suggestions');
     if (!input || !list || list.hidden) return;
@@ -361,7 +367,7 @@ document.addEventListener('keydown', function (e) {
         suggestionIndex = Math.max(suggestionIndex - 1, 0);
         items.forEach((it, i) => it.setAttribute('aria-selected', i === suggestionIndex ? 'true' : 'false'));
     } else if (e.key === 'Enter') {
-        if (suggestionIndex >= 0 && suggestionIndex < items.length) {
+        if (suggestionIndex >= 0) {
             e.preventDefault();
             selectSuggestion(suggestionIndex);
         }
@@ -370,120 +376,111 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
-// wire input events
+// Connect the search bar events to our functions
 const searchInputEl = document.getElementById('searchInput');
 if (searchInputEl) {
-    searchInputEl.addEventListener('input', function () {
+    searchInputEl.addEventListener('input', () => {
         updateSuggestions();
         applyFilters();
     });
-    searchInputEl.addEventListener('blur', hideSuggestionsSoon);
+    searchInputEl.addEventListener('blur', () => {
+        setTimeout(() => { if (document.getElementById('suggestions')) document.getElementById('suggestions').hidden = true; }, 150);
+    });
     searchInputEl.addEventListener('focus', updateSuggestions);
 }
 
-// Reservation modal buttons wiring
+// Connect most of the buttons to their actions
 const confirmBtn = document.getElementById('confirmReserve');
 if (confirmBtn) confirmBtn.addEventListener('click', confirmReserveHandler);
+
 const cancelReserveBtn = document.getElementById('cancelReserve');
 if (cancelReserveBtn) cancelReserveBtn.addEventListener('click', cancelReserveHandler);
-// Cart button wiring (use Bootstrap Offcanvas when available)
+
 const cartBtn = document.getElementById('cartBtn');
-if (cartBtn && bootstrapCartOffcanvas) {
+if (cartBtn) {
     cartBtn.addEventListener('click', () => {
-        bootstrapCartOffcanvas.show();
+        if (bootstrapCartOffcanvas) bootstrapCartOffcanvas.show();
         renderCartPanel();
     });
-} else if (cartBtn) {
-    // fallback to previous behavior
-    const cartPanel = document.getElementById('cartPanel');
-    cartBtn.addEventListener('click', () => {
-        const open = cartPanel.classList.toggle('open');
-        cartPanel.setAttribute('aria-hidden', String(!open));
-        if (open) renderCartPanel();
-    });
-}
-const closeCart = document.getElementById('closeCart');
-if (closeCart && bootstrapCartOffcanvas) {
-    closeCart.addEventListener('click', () => bootstrapCartOffcanvas.hide());
-} else if (closeCart) {
-    closeCart.addEventListener('click', () => { const cartPanel = document.getElementById('cartPanel'); cartPanel.classList.remove('open'); cartPanel.setAttribute('aria-hidden', 'true'); });
 }
 
-// In-page confirmation modal helper
+const closeCart = document.getElementById('closeCart');
+if (closeCart) {
+    closeCart.addEventListener('click', () => {
+        if (bootstrapCartOffcanvas) bootstrapCartOffcanvas.hide();
+    });
+}
+
+/**
+ * Function: showConfirm
+ * Purpose: Shows a "Are you sure?" message before doing something important.
+ */
 function showConfirm(message, onYes, onNo) {
     const msg = document.getElementById('confirmMessage');
     const yes = document.getElementById('confirmYes');
     const no = document.getElementById('confirmNo');
 
     if (!msg || !yes || !no) {
-        const ok = window.confirm(message);
-        if (ok && typeof onYes === 'function') onYes();
-        else if (!ok && typeof onNo === 'function') onNo();
+        if (window.confirm(message)) onYes();
+        else if (onNo) onNo();
         return;
     }
 
     msg.innerText = message;
-
-    // remove previous listeners to avoid duplicates
     const newYes = yes.cloneNode(true);
     const newNo = no.cloneNode(true);
     yes.parentNode.replaceChild(newYes, yes);
     no.parentNode.replaceChild(newNo, no);
 
-    newYes.addEventListener('click', function () {
+    newYes.addEventListener('click', () => {
         if (bootstrapConfirmModal) bootstrapConfirmModal.hide();
-        if (typeof onYes === 'function') onYes();
+        if (onYes) onYes();
     });
 
-    newNo.addEventListener('click', function () {
+    newNo.addEventListener('click', () => {
         if (bootstrapConfirmModal) bootstrapConfirmModal.hide();
-        if (typeof onNo === 'function') onNo();
+        if (onNo) onNo();
     });
 
     if (bootstrapConfirmModal) bootstrapConfirmModal.show();
 }
-
+/**
+ * Function: displayBooks
+ * Purpose: Takes the list of books from the server and creates the HTML code to show them on the screen.
+ */
 function displayBooks() {
     const container = document.getElementById("bookContainer");
     if (!container) return;
 
-    container.innerHTML = ""; // Clear current view
+    container.innerHTML = ""; // Clear the grid before adding new books
 
-    // If no books match the current filters, show "No result found."
+    // If no books match your search, show a message
     if (!filteredBooks || filteredBooks.length === 0) {
         container.innerHTML = '<div class="col-12 text-center my-5 reveal-item is-visible"><h3 style="color: #c5a059;">No result found.</h3></div>';
         createPagination();
         return;
     }
 
-    // Books are now pre-paginated from server
-    const paginated = filteredBooks;
-
-    // Loop through filtered/paginated books and create Bootstrap card HTML
-    paginated.forEach(book => {
+    // Loop through each book and create a "Card" (image + title + button)
+    filteredBooks.forEach(book => {
         const col = document.createElement('div');
-        col.className = 'col reveal-item'; // Add reveal class for entry motion
+        col.className = 'col reveal-item';
 
         const card = document.createElement('div');
         card.className = 'card h-100';
 
-        // Use a medium, proportional size so book covers remain fully visible
+        // Set up the book image container
         const imgContainer = document.createElement('div');
-        imgContainer.style.height = '240px';
-        imgContainer.style.backgroundColor = '#12100e'; // Dark background in case image doesn't perfectly fit
-        imgContainer.style.overflow = 'hidden';
-        imgContainer.style.display = 'flex';
-        imgContainer.style.alignItems = 'center';
-        imgContainer.style.justifyContent = 'center';
+        imgContainer.style.cssText = 'height: 240px; background: #12100e; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer;';
 
         const img = document.createElement('img');
         img.className = 'card-img-top w-100 h-100';
-        img.style.objectFit = 'contain'; // Changed to 'contain' so nothing is cropped out
-        img.style.padding = '10px'; // Adds a bit of breathing room around the book cover
+        img.style.objectFit = 'contain';
+        img.style.padding = '10px';
         img.src = book.image || 'img/placeholder.jpg';
-        img.alt = book.title;
+        // When you click the image, it shows the summary popup
+        img.addEventListener('click', () => showBookInfo(book));
 
-        // Group the image inside the restricted container
         imgContainer.appendChild(img);
 
         const body = document.createElement('div');
@@ -497,6 +494,7 @@ function displayBooks() {
         author.className = 'card-text text-muted mb-2';
         author.innerText = book.author;
 
+        // Stock levels: Green for available, Yellow for low, Red for none
         const stock = document.createElement('p');
         stock.className = 'mb-3';
         if (book.stock === 0) {
@@ -509,10 +507,11 @@ function displayBooks() {
 
         const footer = document.createElement('div');
         footer.className = 'mt-auto';
-        const btn = document.createElement('button');
 
+        const btn = document.createElement('button');
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
+        // Only logged-in members can see the "Acquire Tome" button
         if (isLoggedIn) {
             btn.className = 'btn btn-primary w-100';
             btn.innerText = 'Acquire Tome';
@@ -521,9 +520,8 @@ function displayBooks() {
         } else {
             btn.className = 'btn btn-outline-secondary w-100';
             btn.innerText = 'Member Benefit';
-            btn.title = 'Login to Acquire this Tome';
             btn.addEventListener('click', () => {
-                showToast('Please login to reserve records.', 'info');
+                showToast('Please login to reserve books.', 'info');
                 setTimeout(() => window.location.href = 'login.html', 1200);
             });
         }
@@ -533,112 +531,56 @@ function displayBooks() {
         body.appendChild(stock);
         footer.appendChild(btn);
         body.appendChild(footer);
-
-        // Assemble with the restricted-height image container
         card.appendChild(imgContainer);
         card.appendChild(body);
-
-        // Add horizontal padding directly to the card to make it smaller inside the grid column
-        card.style.margin = '0 auto';
-        card.style.maxWidth = '85%';
-
         col.appendChild(card);
         container.appendChild(col);
 
-        // Make the cover image open the summary modal on click
-        imgContainer.style.cursor = 'pointer';
-        img.title = 'Click to learn about this tome';
-        img.addEventListener('click', () => showBookInfo(book));
-
-        // If page is already ready, show book immediately
-        // This is used for pagination—when you switch pages, books don't need a slow entrance
-        if (document.body.classList.contains('is-ready')) {
-            setTimeout(() => col.classList.add('is-visible'), 50);
-        }
+        // Make the book appear slowly for a nice effect
+        setTimeout(() => col.classList.add('is-visible'), 50);
     });
 
     createPagination();
 }
 
-// Show book info/summary modal
+/**
+ * Function: showBookInfo
+ * Purpose: Opens the summary popup when you click a book's cover.
+ */
 function showBookInfo(book) {
     const modal = document.getElementById('bookInfoModal');
     if (!modal) return;
 
-    // Populate modal fields
-    const infoImg = document.getElementById('infoBookImg');
-    const infoTitle = document.getElementById('infoBookTitle');
-    const infoAuthor = document.getElementById('infoBookAuthor');
-    const infoGenre = document.getElementById('infoBookGenre');
-    const infoSummary = document.getElementById('infoBookSummary');
+    document.getElementById('infoBookImg').src = book.image || '';
+    document.getElementById('infoBookTitle').innerText = book.title;
+    document.getElementById('infoBookAuthor').innerText = book.author;
+    document.getElementById('infoBookGenre').innerText = book.genre || '';
+    document.getElementById('infoBookSummary').innerText = book.summary || 'No summary available.';
 
-    if (infoImg) { infoImg.src = book.image || ''; infoImg.alt = book.title; }
-    if (infoTitle) infoTitle.innerText = book.title;
-    if (infoAuthor) infoAuthor.innerText = book.author;
-    if (infoGenre) infoGenre.innerText = book.genre || '';
-    if (infoSummary) infoSummary.innerText = book.summary || 'No summary available.';
-
-    // Open via Bootstrap if available
     if (window.bootstrap) {
-        try {
-            const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
-            bsModal.show();
-        } catch (e) {
-            modal.classList.add('show');
-            modal.style.display = 'block';
-        }
-    } else {
-        modal.classList.add('show');
-        modal.style.display = 'block';
+        bootstrap.Modal.getOrCreateInstance(modal).show();
     }
 }
 
-// Logic to handle reserving a book
+/**
+ * Function: reserveBook
+ * Purpose: Handles the process of borrowing a book for a few days.
+ */
 function reserveBook(id) {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-        showToast('Please login to reserve this tome from the Archive.', 'error');
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
-        return;
-    }
-
     const book = filteredBooks.find(b => b.id === id);
-    if (!book) return;
-    if (book.stock <= 0) {
-        showToast('This book is currently unavailable.', 'error');
-        return;
-    }
+    if (!book || book.stock <= 0) return;
 
-    // open modal to choose days (1-15)
     pendingReserveId = id;
     const modal = document.getElementById('reserveModal');
-    const nameEl = document.getElementById('reserveBookName');
     const daysSel = document.getElementById('reserveDays');
-    if (!modal || !nameEl || !daysSel) {
-        // fallback: immediate reserve for 15 days
-        doConfirmReserve(15);
-        return;
-    }
 
-    nameEl.innerText = `Reserve "${book.title}" — select how many days (max 15):`;
+    document.getElementById('reserveBookName').innerText = `Reserve "${book.title}" (Max 15 days):`;
 
-    // populate days 1..15
+    // We let you pick between 1 and 15 days
     daysSel.innerHTML = Array.from({ length: 15 }, (_, i) => `<option value="${i + 1}">${i + 1} day${i + 1 > 1 ? 's' : ''}</option>`).join('');
     daysSel.value = '7';
 
-    // show modal using Bootstrap modal if available, otherwise fallback
-    if (bootstrapReserveModal) {
-        bootstrapReserveModal.show();
-        setTimeout(() => daysSel.focus(), 200);
-    } else {
-        modal.classList.add('open');
-        modal.hidden = false;
-        modal.setAttribute('aria-hidden', 'false');
-        // small timeout to ensure browser renders options before focus
-        setTimeout(() => daysSel.focus(), 10);
-    }
+    if (bootstrapReserveModal) bootstrapReserveModal.show();
 }
 
 function hideReserveModal() {
@@ -653,151 +595,82 @@ function hideReserveModal() {
     pendingReserveId = null;
 }
 
+/**
+ * Function: doConfirmReserve
+ * Purpose: Saves your reservation after you pick the number of days.
+ */
 function doConfirmReserve(days) {
-    // Front-end only: create a UI reservation, persist it, and close the modal.
-    const id = pendingReserveId;
-    const bookIndex = filteredBooks.findIndex(b => b.id === id);
-    if (bookIndex === -1) {
-        hideReserveModal();
+    const book = filteredBooks.find(b => b.id === pendingReserveId);
+    if (!book) return;
+
+    // Check if you already have this book reserved
+    if (reservations.find(r => r.id === book.id)) {
+        showToast('You already have this book reserved.', 'info');
+        if (bootstrapReserveModal) bootstrapReserveModal.hide();
         return;
     }
-    const book = filteredBooks[bookIndex];
 
-    const d = parseInt(days, 10) || 1;
-    const daysClamped = Math.max(1, Math.min(15, d));
-
-    // compute due date (YYYY-MM-DD)
+    // Save the reservation with the date you need to return it
     const due = new Date();
-    due.setDate(due.getDate() + daysClamped);
-    const dueISO = due.toISOString().split('T')[0];
+    due.setDate(due.getDate() + parseInt(days));
+    reservations.push({ id: book.id, title: book.title, days: days, dueDate: due.toISOString().split('T')[0], qty: 1 });
 
-    // aggregate reservations by book id (front-end only)
-    const existing = reservations.find(r => r.id === book.id);
-    if (existing) {
-        showToast('You have already reserved this tome.', 'info');
-        hideReserveModal();
-        return;
-    } else {
-        const reservation = { id: book.id, title: book.title, days: daysClamped, dueDate: dueISO, qty: 1 };
-        reservations.push(reservation);
-    }
-
-    // reflect reserved state in UI by decrementing stock and increasing counter
+    // Decrease the stock count and save to browser memory
     if (book.stock > 0) book.stock--;
     reservedCount++;
 
     saveToStorage();
-    applyFilters();
+    displayBooks(); // Refresh the list
     updateStats();
-    renderReservations();
     renderCartPanel();
-    hideReserveModal();
+    if (bootstrapReserveModal) bootstrapReserveModal.hide();
 }
 
 function confirmReserveHandler() {
-    const daysSel = document.getElementById('reserveDays');
-    if (!daysSel) return;
-    doConfirmReserve(daysSel.value);
+    const days = document.getElementById('reserveDays').value;
+    doConfirmReserve(days);
 }
 
 function cancelReserveHandler() {
-    hideReserveModal();
+    if (bootstrapReserveModal) bootstrapReserveModal.hide();
 }
 
 // Render current reservations list
 function renderReservations() {
-    const container = document.getElementById('reservationsList');
-    if (!container) return;
-
-    if (!reservations || reservations.length === 0) {
-        container.innerText = 'No reservations yet.';
-        return;
-    }
-
-    container.innerHTML = '';
-    const list = document.createElement('div');
-    list.className = 'reservations-list';
-
-    reservations.forEach(r => {
-        const item = document.createElement('div');
-        item.className = 'reservation-item';
-
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        const title = document.createElement('div');
-        title.className = 'title';
-        title.innerText = r.title;
-        const due = document.createElement('div');
-        due.className = 'due';
-        due.innerText = `Due: ${r.dueDate} (${r.days} day${r.days > 1 ? 's' : ''})`;
-        meta.appendChild(title);
-        meta.appendChild(due);
-
-        const actions = document.createElement('div');
-        const btn = document.createElement('button');
-        btn.className = 'btn-cancel-res';
-        btn.innerText = 'Cancel Reservation';
-        btn.addEventListener('click', () => cancelReservation(r.id));
-        actions.appendChild(btn);
-
-        item.appendChild(meta);
-        item.appendChild(actions);
-
-        list.appendChild(item);
-    });
-
-    container.appendChild(list);
+    // This part is handled by the Cart Panel (Offcanvas)
 }
 
-// Render compact cart panel next to header cart button
+/**
+ * Function: renderCartPanel
+ * Purpose: Shows all the books you have in your cart.
+ */
 function renderCartPanel() {
-    const panel = document.getElementById('cartPanel');
     const listEl = document.getElementById('cartList');
     const countEl = document.getElementById('cartCount');
 
-    // update badge even if panel is not present/open
-    const totalQty = reservations.reduce((s, r) => s + (r.qty || 1), 0);
-    if (countEl) countEl.innerText = String(totalQty);
-
-    // populate panel only if elements exist
-    if (!panel || !listEl) return;
+    if (countEl) countEl.innerText = String(reservedCount);
+    if (!listEl) return;
 
     listEl.innerHTML = '';
-    if (!reservations || reservations.length === 0) {
-        listEl.innerText = 'No reservations.';
+    if (reservations.length === 0) {
+        listEl.innerText = 'Your cart is empty.';
         return;
     }
 
+    // List each book in your cart with its return date
     reservations.forEach(r => {
         const item = document.createElement('div');
-        item.className = 'cart-item';
-
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.innerHTML = `<div class="title">${r.title}</div><div class="due">Due: ${r.dueDate}</div>`;
-
-        const controls = document.createElement('div');
-        controls.className = 'controls';
-
-        const minus = document.createElement('button');
-        minus.innerText = '-';
-        minus.title = 'Decrease quantity';
-        minus.addEventListener('click', () => changeReservationQty(r.id, -1));
-
-        const qty = document.createElement('div');
-        qty.innerText = String(r.qty || 1);
-
-        const plus = document.createElement('button');
-        plus.innerText = '+';
-        plus.title = 'Increase quantity';
-        plus.addEventListener('click', () => changeReservationQty(r.id, +1));
-
-        controls.appendChild(minus);
-        controls.appendChild(qty);
-        controls.appendChild(plus);
-
-        item.appendChild(meta);
-        item.appendChild(controls);
+        item.className = 'cart-item mb-3 p-2 border-bottom';
+        item.style.color = '#f5e6d3';
+        item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${r.title}</strong><br>
+                    <small>Returns on: ${r.dueDate}</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger" onclick="cancelReservation(${r.id})">Remove</button>
+            </div>
+        `;
         listEl.appendChild(item);
     });
 }

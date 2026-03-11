@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <!-- The title shown at the top of the browser tab -->
+    <!-- This is the title people see at the top of their browser tab -->
     <title>Amal Jyothi College Archive</title>
-    <!-- Makes the page look good on phones and computers -->
+    
+    <!-- This line makes sure the website looks correct on both phones and computers -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Loads Bootstrap for basic layout building blocks -->
+    
+    <!-- We use Bootstrap to help us position things easily (like the navbar) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Our custom design choices -->
+    
+    <!-- This is where we keep all our custom colors and design choices -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="landing">
 
-    <!-- Animated Statues -->
+    <!-- These are the decorative statues that slide in when you open the page -->
     <div class="landing-deco start-top">
         <img src="img/statue.png" alt="Statue">
     </div>
@@ -22,39 +25,50 @@
         <img src="img/thinker.jpg" alt="Thinker">
     </div>
 
-    <!-- Navigation bar at the top -->
+    <!-- The Top Navigation Bar -->
     <nav class="navbar py-3" style="position: relative; z-index: 1000;">
+        <div class="container d-flex justify-content-between align-items-center">
+            
+            <!-- Logo and Name: Clicking this always takes you back to the home page -->
             <a class="navbar-brand cinzel" href="index.html" style="display: flex; align-items: center; gap: 15px; text-decoration: none;">
                 <img src="img/ajcelogo.png" alt="AJCE Logo" style="height: 60px; width: auto; filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.5));">
                 <span style="color: #c5a059; font-weight: bold; letter-spacing: 2px; font-size: 1.5rem;">Amal Jyothi College Archive</span>
             </a>
+
+            <!-- Action Buttons: This part changes if you are logged in or logged out -->
             <div id="nav-actions" class="d-flex align-items-center gap-3">
+                <!-- Shown only when logged out: Takes you to the login/signup page -->
                 <a href="login.html" id="auth-link-landing" class="nav-btn"
-                    style="display: none; border: 1px solid rgba(197, 160, 89, 0.5); color: #c5a059; font-family: 'Cinzel', serif; padding: 6px 18px; text-decoration: none; font-size: 0.9rem;">Scholar
-                    Login</a>
+                    style="display: none; border: 1px solid rgba(197, 160, 89, 0.5); color: #c5a059; font-family: 'Cinzel', serif; padding: 6px 18px; text-decoration: none; font-size: 0.9rem;">Scholar Login</a>
+                
+                <!-- Shown only when logged in: Clears your session so you can log out -->
                 <button id="logout-btn-landing" class="nav-btn"
                     style="display: none; background: #8b0000; border: 1px solid #c5a059; color: #f5e6d3; font-family: 'Cinzel', serif; padding: 6px 18px; font-size: 0.9rem;">Logout</button>
             </div>
         </div>
     </nav>
 
+    <!-- The Main Hero Section: The big welcome text in the middle -->
     <section class="hero">
         <div class="container">
             <div class="hero-content mx-auto text-center">
                 <h1>Welcome to the Amal Jyothi College Archive</h1>
                 <p>"A sanctuary for the preservation of forbidden knowledge and classical arts."</p>
+                <!-- This button takes you into the main library page -->
                 <a href="library.html" id="begin-exploration" class="cta-btn">Begin Exploration</a>
             </div>
         </div>
     </section>
 
+    <!-- Footer: The very bottom part of the page -->
     <footer>
         <p>©Amal Jyothi College Management</p>
     </footer>
 
-    <!-- Bootstrap logic for dropdowns and menus -->
+    <!-- Script to make Bootstrap features work -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Our custom logic for the landing page entrance and exit motions -->
+    
+    <!-- Our custom script that handles the login buttons and the smooth animations -->
     <script src="js/landing.js"></script>
 </body>
 

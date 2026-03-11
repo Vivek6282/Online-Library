@@ -5,9 +5,9 @@
  * RECONSTRUCTED FOR STABILITY
  */
 
-// Basic error reporting for development
+// Error reporting - logging only to avoid breaking JSON
 error_reporting(E_ALL);
-ini_set('display_errors', 1); // Temporarily enabled to catch the 500 error
+ini_set('display_errors', 0); 
 
 header('Content-Type: application/json');
 
@@ -56,6 +56,10 @@ switch ($action) {
         break;
 }
 
+/**
+ * Function: handleLoad
+ * Purpose: Fetches books from the database with search and filters.
+ */
 function handleLoad($conn) {
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 6;
@@ -63,7 +67,7 @@ function handleLoad($conn) {
     $genre = isset($_GET['genre']) ? strtolower(trim($_GET['genre'])) : 'all';
     $offset = ($page - 1) * $limit;
 
-    // Build query
+    // Build the query
     $sql = "SELECT * FROM books WHERE 1=1";
     $params = [];
     $types = "";
@@ -82,8 +86,9 @@ function handleLoad($conn) {
         $types .= "s";
     }
 
-    // Get total count for pagination
-    $countStmt = $conn->prepare(str_replace("SELECT *", "SELECT COUNT(*)", $sql));
+    // First, count total for pagination
+    $countSql = str_replace("SELECT *", "SELECT COUNT(*)", $sql);
+    $countStmt = $conn->prepare($countSql);
     if (!empty($params)) {
         $countStmt->bind_param($types, ...$params);
     }
@@ -91,7 +96,7 @@ function handleLoad($conn) {
     $totalBooks = $countStmt->get_result()->fetch_row()[0];
     $countStmt->close();
 
-    // Get paginated results
+    // Now, get the actual books
     $sql .= " LIMIT ? OFFSET ?";
     $params[] = $limit;
     $params[] = $offset;
@@ -108,11 +113,11 @@ function handleLoad($conn) {
     }
     $stmt->close();
 
-    // NOTE: Reservations are still handled via JSON for now, or you can expand this later
     echo json_encode([
+        'success' => true,
         'books' => $books,
         'totalBooks' => (int)$totalBooks,
-        'reservations' => [], // Placeholder for now
+        'reservations' => [], 
         'reservedCount' => 0
     ]);
 }

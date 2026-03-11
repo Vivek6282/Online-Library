@@ -143,13 +143,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("Invalid server response.");
                 }
 
+                // Check if the server response was successful (HTTP status 200-299)
                 if (response.ok) {
+                    // If login is successful, show a success message
                     showMessage(loginMessage, "Access Granted. Redirecting...", false);
+                    // Store user information in the browser's local storage
                     localStorage.setItem("isLoggedIn", "true");
                     localStorage.setItem("userIdNo", result.user.id_no);
                     localStorage.setItem("userName", result.user.full_name);
                     localStorage.setItem("userRole", result.user.role || 'user');
                     
+                    // After a short delay, redirect the user based on their role
                     setTimeout(() => {
                         if (result.user.role === 'admin') {
                             window.location.href = "admin.html";
@@ -158,12 +162,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     }, 1000);
                 } else {
+                    // If login failed, show an error message from the server
                     showMessage(loginMessage, result.error || "Authentication failed.");
+                    // Hide the spinner and re-enable the login button
                     loginBtnLabel.style.display = "inline";
                     loginBtnSpinner.hidden = true;
                     loginBtn.disabled = false;
                 }
             } catch (err) {
+                // If there's a network error or other issue, log it and show a message
                 console.error("Login error:", err);
                 showMessage(loginMessage, "Server Connection Failed.");
                 loginBtnLabel.style.display = "inline";

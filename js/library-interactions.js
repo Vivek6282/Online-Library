@@ -1,3 +1,5 @@
+// This script adds "Magical Effects" to the library page.
+// It makes the cursor glow, adds ripples when you click, and makes book cards tilt.
 /**
  * library-interactions.js
  * ============================================================

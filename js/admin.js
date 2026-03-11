@@ -51,17 +51,31 @@ async function loadUsers() {
     }
 }
 
+/**
+ * Function: deleteUser
+ * Purpose: Tells the server to remove a user from the database.
+ */
 async function deleteUser(id) {
     if (!confirm('Are you sure you want to remove this user?')) return;
-    const response = await fetch('api.php?action=delete_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${id}`
-    });
-    const result = await response.json();
-    if (result.success) loadUsers();
+    try {
+        const response = await fetch('api.php?action=delete_user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${id}`
+        });
+        const result = await response.json();
+        if (result.success) {
+            loadUsers(); // Refresh the list after deleting
+        }
+    } catch (err) {
+        console.error("Delete failed:", err);
+    }
 }
 
+/**
+ * Function: loadBooks
+ * Purpose: Gets the list of all books from the server and shows them in the table.
+ */
 async function loadBooks() {
     try {
         const response = await fetch('api.php?action=load');
@@ -75,22 +89,28 @@ async function loadBooks() {
             return;
         }
 
-        const tbody = document.querySelector('#books-table tbody');
-        tbody.innerHTML = '';
-        if (result.books && result.books.length > 0) {
-            result.books.forEach(b => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${b.id}</td>
-                    <td>${b.title}</td>
-                    <td>${b.author}</td>
-                    <td>${b.stock}</td>
-                    <td class="text-center"><button class="btn-premium-action btn-delete" onclick="deleteBook(${b.id})">Delete</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } else {
-            tbody.innerHTML = '<tr><td colspan="5">No books found in database.</td></tr>';
+        if (result.success) {
+            const tbody = document.querySelector('#books-table tbody');
+            tbody.innerHTML = ''; // Clear table
+            
+            if (result.books && result.books.length > 0) {
+                // Add each book as a row in the table
+                result.books.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${b.id}</td>
+                        <td>${b.title}</td>
+                        <td>${b.author}</td>
+                        <td>${b.stock}</td>
+                        <td class="text-center">
+                            <button class="btn-premium-action btn-delete" onclick="deleteBook(${b.id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5">No books found in database.</td></tr>';
+            }
         }
     } catch (err) {
         console.error("Connection failed:", err);

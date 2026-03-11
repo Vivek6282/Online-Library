@@ -1,36 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Library System</title>
+    <!-- This is the title of the Library page -->
+    <title>The Book Archive</title>
+    
+    <!-- Makes the page fit correctly on mobile phones and big monitors -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap: This helps us create the layout and buttons quickly -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Our custom design (colors, fonts, etc.) -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="library-body">
 
     <!-- 
-      === 1. ENTRANCE MOTION: THE SHUTTER ===
-      This 'shutter-reveal' acts like a theatre curtain.
-      When the page first loads, it completely covers the screen (it is pure black).
-      JavaScript then adds a CSS class that slides it upwards, revealing the page underneath.
+      THE SHUTTER REVEAL
+      This is a black screen that "slides up" when you first open the library.
+      It creates a cinematic entrance effect.
     -->
     <div class="shutter-reveal"></div>
 
-    <!-- Background Decoration: floating dust particles and the collage images -->
+    <!-- Decorative particles and background images -->
     <div class="dust-motes" id="dustMotes"></div>
-    <!-- Interactive Collage Background -->
     <div class="interactive-collage-bg" id="interactiveCollage"></div>
 
+    <!-- THE HEADER: The top section of the page -->
     <header class="library-header">
-        <!-- 
-          === 2. TIERED ANIMATION: REVEAL ITEMS ===
-          Notice the classes "reveal-item" and "delay-1".
-          JavaScript finds everything with "reveal-item" and fades them in one by one.
-          The "delay" classes control the order they appear.
-        -->
-        <!-- Tier 1: Functional Utility (Bootstrap Navbar) -->
+        
+        <!-- Top Bar: Contains the "Return" link and the Login/Logout button -->
         <nav class="navbar navbar-expand-lg archival-nav-top py-lg-2 py-1 px-3 reveal-item delay-1">
             <div class="container-fluid p-0">
                 <a class="navbar-brand back-link-archival" href="index.html">
@@ -42,17 +43,18 @@
             </div>
         </nav>
 
-        <!-- Tier 2: The big branding title in the middle -->
+        <!-- Page Title: The big "The Book Archive" text -->
         <div class="header-tier-middle container text-center mt-lg-2 mt-1 mb-lg-1 mb-0 reveal-item delay-2">
             <h1 class="archival-main-title">The Book Archive</h1>
         </div>
 
-        <!-- Tier 3: Navigation and search tools -->
+        <!-- Search and Filters: Where you look for specific books -->
         <div class="header-tier-bottom container pb-lg-3 pb-2 reveal-item delay-3">
             <div class="row g-1 g-md-3 align-items-center">
-                <!-- Filter -->
+                
+                <!-- Genre Filter: Choose between Fantasy, History, etc. -->
                 <div class="col-6 col-md-auto">
-                    <select id="genreSelect" class="form-select archival-select-sm" aria-label="Select genre">
+                    <select id="genreSelect" class="form-select archival-select-sm">
                         <option value="All">All Genres</option>
                         <option value="Biography">Biography</option>
                         <option value="Fantasy">Fantasy</option>
@@ -64,43 +66,32 @@
                         <option value="Survival fiction">Survival fiction</option>
                     </select>
                 </div>
-                <!-- Search -->
+
+                <!-- Search Input: Type the name of a book here -->
                 <div class="col-6 col-md">
                     <div class="search-input-group-archival">
-                        <input type="text" id="searchInput" class="form-control archival-input-sm"
-                            placeholder="Search the Archive...">
-                        <ul id="suggestions" class="suggestions-list-archival" role="listbox" hidden aria-hidden="true">
-                        </ul>
+                        <input type="text" id="searchInput" class="form-control archival-input-sm" placeholder="Search the Archive...">
+                        <!-- Suggestions: Shows book names as you type -->
+                        <ul id="suggestions" class="suggestions-list-archival" role="listbox" hidden aria-hidden="true"></ul>
                     </div>
                 </div>
-                <!-- Icons & Cart -->
+
+                <!-- Icons: Social media links and the Cart button -->
                 <div class="col-12 col-md-auto">
                     <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-4">
                         <div class="social-row-archival">
                             <a href="#" class="social-link-archival" aria-label="Facebook">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                             </a>
                             <a href="#" class="social-link-archival" aria-label="Instagram">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                                    <circle cx="12" cy="12" r="4.5" />
-                                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><circle cx="12" cy="12" r="4.5" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
                             </a>
                             <a href="#" class="social-link-archival" aria-label="X">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                             </a>
                         </div>
-                        <button id="cartBtn" class="premium-cart-btn-archival" aria-label="View reservations">
+                        <!-- Cart: Clicking this shows your reserved books -->
+                        <button id="cartBtn" class="premium-cart-btn-archival">
                             <span class="cart-icon-main">🛒</span>
                             <span id="cartCount" class="cart-badge-archival">0</span>
                         </button>
@@ -109,17 +100,18 @@
             </div>
         </div>
     </header>
+
+    <!-- THE BOOK GRID: This is where all the books will appear -->
     <main class="container my-2 reveal-item delay-4">
         <div id="stats" class="mb-3 d-flex gap-3">
             <span id="totalBooks" class="me-3"></span>
             <span id="reservedCount"></span>
         </div>
 
-
-
-        <!-- This is where all the book cards are generated by JavaScript -->
+        <!-- This empty div is filled with books by the "script.js" file -->
         <div id="bookContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
-        <!-- Pagination controls at the bottom -->
+        
+        <!-- Pagination: Lets you switch between Page 1, 2, etc. -->
         <nav id="pagination" aria-label="Books pagination" class="mt-4"></nav>
     </main>
 
@@ -128,7 +120,7 @@
         <h2>Current Reservations</h2>
         <div id="reservationsList">No reservations yet.</div>
     </section>
-    <!-- Bootstrap Offcanvas for Cart -->
+    <!-- THE CART PANEL: A sidebar that slides out to show your reservations -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="cartPanel" aria-labelledby="cartPanelLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="cartPanelLabel">Reservations</h5>
@@ -142,11 +134,7 @@
         </div>
     </div>
 
-    <!--
-     BOOK SUMMARY MODAL
-     This is a popup box that appears when you click a book image.
-     It shows more details like the author and a summary.
-    -->
+    <!-- THE BOOK INFO MODAL: A popup that shows the book's summary -->
     <div class="modal fade book-info-modal" id="bookInfoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -177,7 +165,6 @@
     </div>
 
     <!-- Reservation modal (Bootstrap) -->
-
     <div class="modal fade" id="reserveModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -218,11 +205,7 @@
         </div>
     </div>
 
-    <!--
-    SITE FOOTER
-    Anchors the bottom of the page with standard secondary links (About, Contact, etc.).
-    Designed with a deep, dark parchment look to cleanly end the visual flow.
--->
+    <!-- FOOTER: The bottom part of the page -->
     <footer class="site-footer">
         <div class="container text-center">
             <div class="footer-links">
@@ -235,28 +218,16 @@
         </div>
     </footer>
 
-    <!-- 
-      === BOOTSTRAP JS === 
-      Bootstrap needs this script to make dropdowns and modals work.
-    -->
+    <!-- Bootstrap Script: Makes modals and dropdowns work -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- 
-      === CORE LIBRARY LOGIC === 
-      script.js handles searching, filtering, pagination, and the initial page entrance trigger.
-    -->
+    <!-- script.js: This is the brain of the archive. It loads all the books! -->
     <script src="script.js"></script>
 
-    <!-- 
-      === PREMIUM CLICK EFFECTS === 
-      library-interactions.js handles all the mouse/click physics:
-      - Gold ink ripples on click
-      - Cursor glow trail
-      - 3D card tilts
-      - The dark exit curtain before navigation
-    -->
+    <!-- library-interactions.js: This adds the cool mouse movements and golden ripples -->
     <script src="js/library-interactions.js"></script>
 
+    <!-- Toast: A small notification box at the bottom right -->
     <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 </body>
 

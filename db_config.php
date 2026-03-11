@@ -1,34 +1,32 @@
 <?php
 /**
- * db_config.php
- * Handles the database connection for the Online Library.
+ * DATABASE CONFIGURATION
+ * This file contains the settings to connect our website to the MySQL Database.
  */
 
-$servername = "localhost";
-$username = "root";
-$password = ""; 
-$dbname = "book_catalog";
+$host = 'localhost';
+$db   = 'book_catalog';
+$user = 'root';
+$pass = '';
 
-// Prevent mysqli from throwing warnings/notices that break JSON
-error_reporting(0);
-ini_set('display_errors', 0);
+// Prevent mysqli from throwing warnings that break JSON
+mysqli_report(MYSQLI_REPORT_OFF);
 
 try {
-    // The @ operator suppresses the warning that breaks JSON parsing
-    $conn = @new mysqli($servername, $username, $password, $dbname);
-    
+    // Create connection
+    $conn = new mysqli($host, $user, $pass, $db);
+
+    // Check connection
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
 } catch (Exception $e) {
-    // Ensure all errors are returned as JSON
+    // If connection fails, return a JSON error so the frontend knows what happened
     header('Content-Type: application/json');
-    http_response_code(500);
     echo json_encode([
         "success" => false, 
-        "error" => "Database connection failed. Please ensure XAMPP MySQL is running and the 'book_catalog' database exists.",
+        "error" => "Database connection failed. Please ensure XAMPP MySQL is running.",
         "debug" => $e->getMessage()
     ]);
     exit;
 }
-?>
