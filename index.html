@@ -3,7 +3,7 @@
 
 <head>
     <!-- The title shown at the top of the browser tab -->
-    <title>The Grand Archive</title>
+    <title>Amal Jyothi College Archive</title>
     <!-- Makes the page look good on phones and computers -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Loads Bootstrap for basic layout building blocks -->
@@ -23,11 +23,17 @@
     </div>
 
     <!-- Navigation bar at the top -->
-    <nav class="navbar">
-        <div class="container">
-            <a class="navbar-brand" href="#">The Grand Archive</a>
-            <!-- This area will dynamically show buttons like 'Scholar Login' or 'Return to Login' -->
-            <div id="nav-actions" class="ms-auto d-flex gap-3">
+    <nav class="navbar py-3" style="position: relative; z-index: 1000;">
+            <a class="navbar-brand cinzel" href="index.html" style="display: flex; align-items: center; gap: 15px; text-decoration: none;">
+                <img src="img/ajcelogo.png" alt="AJCE Logo" style="height: 60px; width: auto; filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.5));">
+                <span style="color: #c5a059; font-weight: bold; letter-spacing: 2px; font-size: 1.5rem;">Amal Jyothi College Archive</span>
+            </a>
+            <div id="nav-actions" class="d-flex align-items-center gap-3">
+                <a href="login.html" id="auth-link-landing" class="nav-btn"
+                    style="display: none; border: 1px solid rgba(197, 160, 89, 0.5); color: #c5a059; font-family: 'Cinzel', serif; padding: 6px 18px; text-decoration: none; font-size: 0.9rem;">Scholar
+                    Login</a>
+                <button id="logout-btn-landing" class="nav-btn"
+                    style="display: none; background: #8b0000; border: 1px solid #c5a059; color: #f5e6d3; font-family: 'Cinzel', serif; padding: 6px 18px; font-size: 0.9rem;">Logout</button>
             </div>
         </div>
     </nav>
@@ -35,7 +41,7 @@
     <section class="hero">
         <div class="container">
             <div class="hero-content mx-auto text-center">
-                <h1>Welcome to the Grand Historical Archive</h1>
+                <h1>Welcome to the Amal Jyothi College Archive</h1>
                 <p>"A sanctuary for the preservation of forbidden knowledge and classical arts."</p>
                 <a href="library.html" id="begin-exploration" class="cta-btn">Begin Exploration</a>
             </div>
@@ -43,7 +49,7 @@
     </section>
 
     <footer>
-        <p>©The Archival Society</p>
+        <p>©Amal Jyothi College Management</p>
     </footer>
 
     <!-- Bootstrap logic for dropdowns and menus -->

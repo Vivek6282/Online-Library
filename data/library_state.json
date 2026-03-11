@@ -1,0 +1,105 @@
+{
+    "books": [
+        {
+            "id": 1,
+            "title": "Harry Potter and the Philosopher's Stone",
+            "author": "J.K. Rowling",
+            "stock": 3,
+            "image": "img\/harrypotter.jpg",
+            "genre": "Fantasy",
+            "summary": "On his eleventh birthday, orphan Harry Potter discovers he is a wizard and is whisked away to Hogwarts School of Witchcraft and Wizardry. Beneath the wonder of spells and moving staircases lurks a dark secret \u2014 an immortal sorcerer's stone and the shadow of a villain who once nearly destroyed the wizarding world. The first chapter in an epic saga of courage, friendship, and the eternal battle between light and darkness."
+        },
+        {
+            "id": 2,
+            "title": "MEIN KAMPF",
+            "author": "Adolf Hitler",
+            "stock": 0,
+            "image": "img\/adolfhitler.jpg",
+            "genre": "Biography, History",
+            "summary": "Written during Hitler's imprisonment in 1924, this autobiographical manifesto outlines his political ideology, virulent antisemitism, and vision of Aryan supremacy that would go on to fuel the Nazi regime and the horrors of World War II. Held in this archive as a primary historical document \u2014 a stark testament to how dangerous ideas, left unchecked, can reshape the world in catastrophic ways. Reader discretion is strongly advised."
+        },
+        {
+            "id": 3,
+            "title": "The Lord Of The Rings",
+            "author": "J.R.R. Tolkien",
+            "stock": 1,
+            "image": "img\/LOTR.jpg",
+            "genre": "Fantasy",
+            "summary": "In the ancient land of Middle-earth, a modest hobbit named Frodo Baggins inherits the One Ring \u2014 a relic of terrible power forged by the Dark Lord Sauron. With a fellowship of unlikely companions, he embarks on an impossible quest to destroy it in the fires of Mount Doom before it falls back into shadow. Tolkien's masterwork weaves myth, language, and legend into the definitive fantasy epic of the modern age."
+        },
+        {
+            "id": 4,
+            "title": "Babylon",
+            "author": "Paul Kriwaczek",
+            "stock": 5,
+            "image": "img\/babylon.jpg",
+            "genre": "History",
+            "summary": "Long before Rome or Athens, Babylon rose from the sands of Mesopotamia as humanity's first great metropolis. Kriwaczek traces five thousand years of Babylonian civilisation \u2014 from the invention of writing and law under Hammurabi, to the legendary Hanging Gardens, to its eventual fall. A vivid and scholarly journey to the very cradle of human culture, politics, and urban life."
+        },
+        {
+            "id": 5,
+            "title": "The Tesla Coil",
+            "author": "Nikola Tesla",
+            "stock": 5,
+            "image": "img\/Tesla.png",
+            "genre": "Non-fiction",
+            "summary": "A rare compendium of Nikola Tesla's own writings, patents, and lectures surrounding his most celebrated invention \u2014 the Tesla Coil. With characteristic visionary fervour, Tesla illuminates the principles of resonant transformer circuits and his grand dream of wireless energy transmission across continents. Essential reading for anyone wishing to understand the mind behind the modern electrical age."
+        },
+        {
+            "id": 6,
+            "title": "The Sound Between the Notes",
+            "author": "Barbara Linn Probst",
+            "stock": 7,
+            "image": "img\/nehu2.jpg",
+            "genre": "Music",
+            "summary": "Story of a pianist who returns to music after many years but must confront a genetic illness and her hidden past while discovering her identity."
+        },
+        {
+            "id": 7,
+            "title": "The Diary of a Young Girl",
+            "author": "Anne Frank",
+            "stock": 4,
+            "image": "img\/annfake.jpg",
+            "genre": "Biography",
+            "summary": "A Jewish teenager, Anne Frank, records her thoughts, fears, and hopes while hiding from Nazis during World War II."
+        },
+        {
+            "id": 8,
+            "title": "India and World Geography",
+            "author": "Majid Husain",
+            "stock": 6,
+            "image": "img\/nehu3.jpg",
+            "genre": "Geography",
+            "summary": "This provides a clear overview of India's physical and human geography along with many other geographical features of the world specially for civil service aspirants."
+        },
+        {
+            "id": 9,
+            "title": "Jungle",
+            "author": "Yossi Ghinsberg",
+            "stock": 3,
+            "image": "img\/nehu1.jpg",
+            "genre": "Survival Fiction",
+            "summary": "A backpacker becomes lost in the Amazon rainforest and must survive alone for weeks, facing extreme danger, fear, and the raw power of nature."
+        },
+        {
+            "title": "testing",
+            "author": "vivek",
+            "genre": "special",
+            "stock": 1,
+            "image": "awt assignment 2\/img\/aurafarming.jpg",
+            "summary": "haha suiii",
+            "id": 10
+        },
+        {
+            "title": "testing",
+            "author": "vivek",
+            "genre": "special",
+            "stock": 1,
+            "image": "awt assignment 2\/img\/aurafarming.jpg",
+            "summary": "dd",
+            "id": 11
+        }
+    ],
+    "reservations": [],
+    "reservedCount": 0
+}

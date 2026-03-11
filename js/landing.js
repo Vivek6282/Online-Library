@@ -11,19 +11,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const isGuest = localStorage.getItem('isGuest') === 'true';
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-    if (navActions && (isGuest || !isLoggedIn)) {
-        const loginBtn = document.createElement('a');
-        loginBtn.href = 'login.html';
-        loginBtn.className = 'nav-btn';
-        loginBtn.style.borderColor = 'transparent';
-        loginBtn.innerText = isGuest ? 'Return to Login' : 'Scholar Login';
-
-        loginBtn.addEventListener('click', () => {
-            localStorage.removeItem('isGuest'); // When they leave, forget their guest status
-        });
-
-        navActions.appendChild(loginBtn);
+    // --- AUTH UI LOGIC ---
+    function updateLandingAuth() {
+        const authLink = document.getElementById('auth-link-landing');
+        const logoutBtn = document.getElementById('logout-btn-landing');
+        
+        console.log("Landing Auth Status - isLoggedIn:", isLoggedIn, "isGuest:", isGuest);
+        
+        if (isLoggedIn) {
+            // Signed In: Hide Login, Show Logout
+            if (authLink) {
+                authLink.style.display = 'none';
+                console.log("Hiding Login Button");
+            }
+            if (logoutBtn) {
+                logoutBtn.style.display = 'inline-block';
+                logoutBtn.onclick = () => {
+                    localStorage.clear();
+                    window.location.reload();
+                };
+                console.log("Showing Logout Button");
+            }
+        } else {
+            // Signed Out: Show Login, Hide Logout
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (authLink) {
+                authLink.style.display = 'inline-block';
+                authLink.innerText = isGuest ? 'Return to Login' : 'Scholar Login';
+                authLink.href = 'login.html';
+                authLink.onclick = () => {
+                    localStorage.removeItem('isGuest');
+                };
+                console.log("Showing Login Button (Guest or New)");
+            }
+        }
     }
+    
+    updateLandingAuth();
 
     if (!beginBtn) return;
 

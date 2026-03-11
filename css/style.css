@@ -153,9 +153,9 @@ body {
 }
 
 .intro-subtitle {
-  font-size: 1.2rem;
+  font-size: 34px;
   font-style: italic;
-  color: var(--text-secondary);
+  color: #c99143;
   margin: 0;
 }
 

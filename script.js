@@ -1,184 +1,76 @@
-// This file is the 'brain' of the library page. 
-// It keeps track of all the books and handles searching, filtering, and reserving books.
-let books = [
-    {
-        "id": 1,
-        "title": "Harry Potter and the Philosopher's Stone",
-        "author": "J.K. Rowling",
-        "stock": 3,
-        "image": "img/harrypotter.jpg",
-        "genre": "Fantasy",
-        "summary": "On his eleventh birthday, orphan Harry Potter discovers he is a wizard and is whisked away to Hogwarts School of Witchcraft and Wizardry. Beneath the wonder of spells and moving staircases lurks a dark secret — an immortal sorcerer's stone and the shadow of a villain who once nearly destroyed the wizarding world. The first chapter in an epic saga of courage, friendship, and the eternal battle between light and darkness."
-    },
-    {
-        "id": 2,
-        "title": "MEIN KAMPF",
-        "author": "Adolf Hitler",
-        "stock": 0,
-        "image": "img/adolfhitler.jpg",
-        "genre": "Biography, History",
-        "summary": "Written during Hitler's imprisonment in 1924, this autobiographical manifesto outlines his political ideology, virulent antisemitism, and vision of Aryan supremacy that would go on to fuel the Nazi regime and the horrors of World War II. Held in this archive as a primary historical document — a stark testament to how dangerous ideas, left unchecked, can reshape the world in catastrophic ways. Reader discretion is strongly advised."
-    },
-    {
-        "id": 3,
-        "title": "The Lord Of The Rings",
-        "author": "J.R.R. Tolkien",
-        "stock": 1,
-        "image": "img/LOTR.jpg",
-        "genre": "Fantasy",
-        "summary": "In the ancient land of Middle-earth, a modest hobbit named Frodo Baggins inherits the One Ring — a relic of terrible power forged by the Dark Lord Sauron. With a fellowship of unlikely companions, he embarks on an impossible quest to destroy it in the fires of Mount Doom before it falls back into shadow. Tolkien's masterwork weaves myth, language, and legend into the definitive fantasy epic of the modern age."
-    },
-    {
-        "id": 4,
-        "title": "Babylon",
-        "author": "Paul Kriwaczek",
-        "stock": 5,
-        "image": "img/babylon.jpg",
-        "genre": "History",
-        "summary": "Long before Rome or Athens, Babylon rose from the sands of Mesopotamia as humanity's first great metropolis. Kriwaczek traces five thousand years of Babylonian civilisation — from the invention of writing and law under Hammurabi, to the legendary Hanging Gardens, to its eventual fall. A vivid and scholarly journey to the very cradle of human culture, politics, and urban life."
-    },
-    {
-        "id": 5,
-        "title": "The Tesla Coil",
-        "author": "Nikola Tesla",
-        "stock": 5,
-        "image": "img/Tesla.png",
-        "genre": "Non-fiction",
-        "summary": "A rare compendium of Nikola Tesla's own writings, patents, and lectures surrounding his most celebrated invention — the Tesla Coil. With characteristic visionary fervour, Tesla illuminates the principles of resonant transformer circuits and his grand dream of wireless energy transmission across continents. Essential reading for anyone wishing to understand the mind behind the modern electrical age."
-    },
-    {
-        "id": 6,
-        "title": "The Sound Between the Notes",
-        "author": "Barbara Linn Probst",
-        "stock": 7,
-        "image": "img/nehu2.jpg",
-        "genre": "Music",
-        "summary": "Story of a pianist who returns to music after many years but must confront a genetic illness and her hidden past while discovering her identity."
-    },
-    {
-        "id": 7,
-        "title": "The Diary of a Young Girl",
-        "author": "Anne Frank",
-        "stock": 4,
-        "image": "img/annfake.jpg",
-        "genre": "Biography",
-        "summary": "A Jewish teenager, Anne Frank, records her thoughts, fears, and hopes while hiding from Nazis during World War II."
-    },
-    {
-        "id": 8,
-        "title": "India and World Geography",
-        "author": "Majid Husain",
-        "stock": 6,
-        "image": "img/nehu3.jpg",
-        "genre": "Geography",
-        "summary": "This provides a clear overview of India's physical and human geography along with many other geographical features of the world specially for civil service aspirants."
-    },
-    {
-        "id": 9,
-        "title": "Jungle",
-        "author": "Yossi Ghinsberg",
-        "stock": 3,
-        "image": "img/nehu1.jpg",
-        "genre": "Survival Fiction",
-        "summary": "A backpacker becomes lost in the Amazon rainforest and must survive alone for weeks, facing extreme danger, fear, and the raw power of nature."
-    }
-];
-
-
-// Supported genres (will populate the dropdown)
-const defaultBooks = [...books]; // Store default books for fallback
+// Redundant hardcoded data removed. Library state is now managed by api.php.
 const STORAGE_KEY = 'library_books_v1';
 const RESERVED_KEY = 'library_reserved_v1';
 const RESERVATIONS_KEY = 'library_reservations_v1';
 
 function loadFromStorage() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            books = JSON.parse(raw);
-        } else {
-            books = defaultBooks.slice();
-        }
-    } catch (e) {
-        books = defaultBooks.slice();
-    }
-
-    // Normalize numeric stock values coming from storage
-    try {
-        books.forEach(b => { b.stock = Number(b.stock) || 0; });
-    } catch (e) {
-        // if something odd happened, ensure we at least have the defaults
-        books = defaultBooks.slice();
-        books.forEach(b => { b.stock = Number(b.stock) || 0; });
-    }
-
-    // Load reservations so we can safely reconcile stored book stock with defaults
-    try {
         const rawRes = localStorage.getItem(RESERVATIONS_KEY);
         reservations = rawRes ? JSON.parse(rawRes) : [];
-    } catch (e) {
-        reservations = [];
-    }
+        const rawCount = localStorage.getItem(RESERVED_KEY);
+        reservedCount = rawCount ? Number(rawCount) : 0;
 
-    // Reconcile stored books against `defaultBooks` to recover from stale
-    // localStorage values. If a default has more stock than the stored value
-    // and there are no reservations for that book, restore the default stock.
-    try {
-        defaultBooks.forEach(def => {
-            const stored = books.find(b => b.id === def.id);
-            const hasReservation = reservations.some(r => r.id === def.id);
-            if (stored) {
-                // Restore stock if no reservation holds it. Also aggressively set stock to 0 if the database says it's 0.
-                if (Number(def.stock) === 0) {
-                    stored.stock = 0;
-                } else if (!hasReservation && (Number(stored.stock) < Number(def.stock))) {
-                    stored.stock = Number(def.stock) || 0;
-                }
-                // Always forcefully sync static metadata from source (defaultBooks)
-                // This guarantees that if we update a book's genre, title, or image in the code,
-                // the user immediately sees it, rather than seeing stale cached localStorage data.
-                stored.title = def.title;
-                stored.author = def.author;
-                stored.summary = def.summary;
-                stored.image = def.image;
-                stored.genre = def.genre;
-            } else {
-                // If a new book was added to the code but isn't in localStorage yet, add it!
-                books.push({ ...def });
+        // MIGRATION: Check if there are local books to sync to the server (from previous client-side only version)
+        const localBooks = localStorage.getItem(STORAGE_KEY);
+        if (localBooks) {
+            const parsed = JSON.parse(localBooks);
+            if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+                // Send them to server once to ensure no data loss during transition
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "api.php?action=save", false); // Synchronous migration to ensure data is safe before fetching
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.send(JSON.stringify({
+                    books: parsed,
+                    reservations: reservations,
+                    reservedCount: reservedCount
+                }));
+                // Clear local books after successful migration
+                localStorage.removeItem(STORAGE_KEY);
             }
-        });
+        }
     } catch (e) {
-        // ignore reconciliation errors; we don't want to block page load
+        console.warn("Migration or load failed", e);
+        reservations = [];
+        reservedCount = 0;
     }
 
-    // Derive reservedCount strictly from the reservations array (sum of qty).
-    reservedCount = Array.isArray(reservations) && reservations.length > 0
-        ? reservations.reduce((sum, r) => sum + (r.qty || 1), 0)
-        : 0;
+    // Initial fetch from server
+    fetchLibraryData();
+}
 
-    // AJAX CONVERSION: Background fetch to synchronize and retrieve the latest records from the remote database
+/**
+ * AJAX CONVERSION: Centralized function to fetch paginated and filtered data from the backend.
+ */
+function fetchLibraryData() {
+    const searchInput = document.getElementById('searchInput');
+    const genreSelect = document.getElementById('genreSelect');
+    const keyword = searchInput ? searchInput.value.trim() : '';
+    const selectedGenre = genreSelect ? genreSelect.value : 'All';
+
+    const params = new URLSearchParams({
+        action: 'load',
+        page: currentPage,
+        limit: booksPerPage,
+        q: keyword,
+        genre: selectedGenre
+    });
+
     const xhr = new XMLHttpRequest();
-    // FIX: Point to the centralized PHP backend
-    xhr.open("GET", "api.php?action=load", true);
+    xhr.open("GET", `api.php?${params.toString()}`, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
                 try {
                     const serverData = JSON.parse(xhr.responseText);
-                    // FIX: Ensure serverData has the expected structure before applying
-                    if (serverData.books && Array.isArray(serverData.books) && serverData.books.length > 0) {
-                        // FIX: Synchronize global 'books' and 'reservations' arrays with server data
-                        books = serverData.books;
+                    if (serverData.books && Array.isArray(serverData.books)) {
+                        // Update global state with server response
+                        filteredBooks = serverData.books;
+                        totalBooks = serverData.totalBooks || 0;
                         reservations = serverData.reservations || [];
                         reservedCount = serverData.reservedCount || 0;
 
-                        // Update fallback storage with fresh server data immediately
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
-                        localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations));
-                        localStorage.setItem(RESERVED_KEY, String(reservedCount));
-
-                        // FIX: Immediately re-apply filters and re-render the UI to reflect server state
-                        applyFilters();
+                        // Re-render UI
+                        displayBooks();
                         updateStats();
                         renderReservations();
                         renderCartPanel();
@@ -187,7 +79,6 @@ function loadFromStorage() {
                     console.warn("Error parsing AJAX server data", error);
                 }
             } else {
-                // FIX: Log server errors for easier debugging
                 console.error("Failed to load library data from server. Status:", xhr.status);
             }
         }
@@ -198,7 +89,6 @@ function loadFromStorage() {
 
 function saveToStorage() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
         localStorage.setItem(RESERVED_KEY, String(reservedCount));
         localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations));
     } catch (e) {
@@ -217,7 +107,7 @@ function saveToStorage() {
         }
     };
     xhr.send(JSON.stringify({
-        books: books,
+        books: filteredBooks, // Note: server should handle merging or direct save
         reservations: reservations,
         reservedCount: reservedCount
     }));
@@ -235,7 +125,8 @@ const genres = [
     "Survival fiction"
 ];
 
-let filteredBooks = books;
+let filteredBooks = [];
+let totalBooks = 0;
 let currentPage = 1;
 let booksPerPage = 6;
 let reservedCount = 0;
@@ -282,21 +173,67 @@ function triggerEntranceMotion() {
     });
 }
 
-// ── IMPORTANT FACTOR: requestAnimationFrame ──
-// When a page loads, if we tell the browser to animate immediately, it might
-// freeze because code is still running. 
-// "requestAnimationFrame" is a special browser function that waits until the 
-// perfect millisecond right before the screen redraws itself.
-// By nesting it twice, we guarantee the browser has finished painting everything 
-// (no freezing!) before we trigger the curtain to lift.
-// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             triggerEntranceMotion();
+            updateAuthUI();
         });
     });
 });
+
+/**
+ * ADAPTATION: Updates the UI based on authentication status and user role.
+ * Adds 'Admin Dashboard' and 'Logout' buttons if applicable.
+ */
+function updateAuthUI() {
+    const authBtn = document.getElementById('authBtn');
+    if (!authBtn) return;
+
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const userRole = localStorage.getItem('userRole');
+    const userName = localStorage.getItem('userName') || 'Member';
+
+    if (isLoggedIn) {
+        authBtn.innerText = 'Logout';
+        authBtn.onclick = logout;
+
+        // If admin, add a Dashboard button next to Logout
+        if (userRole === 'admin') {
+            let adminBtn = document.getElementById('adminDashBtn');
+            if (!adminBtn) {
+                adminBtn = document.createElement('button');
+                adminBtn.id = 'adminDashBtn';
+                adminBtn.className = 'btn btn-archival-logout me-2'; // Reuse the archival style
+                adminBtn.style.borderColor = '#c5a059';
+                adminBtn.style.color = '#c5a059';
+                adminBtn.innerText = 'Admin Dashboard';
+                adminBtn.onclick = () => window.location.href = 'admin.html';
+                authBtn.parentNode.insertBefore(adminBtn, authBtn);
+            }
+        }
+        
+        // Update totalBooks or stats with a welcome message
+        const totalBooksSpan = document.getElementById('totalBooks');
+        if (totalBooksSpan && !totalBooksSpan.dataset.greetingSet) {
+            const greeting = document.createElement('span');
+            greeting.style.color = '#c5a059';
+            greeting.style.marginRight = '15px';
+            greeting.style.fontFamily = "'Cinzel', serif";
+            greeting.innerText = `Welcome, ${userName}`;
+            totalBooksSpan.parentNode.insertBefore(greeting, totalBooksSpan);
+            totalBooksSpan.dataset.greetingSet = "true";
+        }
+    } else {
+        authBtn.innerText = 'Login';
+        authBtn.onclick = () => window.location.href = 'login.html';
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
 
 // Initialize Bootstrap components (if available)
 const reserveModalEl = document.getElementById('reserveModal');
@@ -329,14 +266,16 @@ const MAX_SUGGESTIONS = 8;
 
 function getSuggestions(keyword) {
     if (!keyword) return [];
-    const genreSelect = document.getElementById('genreSelect');
-    const selectedGenre = genreSelect ? genreSelect.value : 'All';
-
-    const pool = books.filter(b => selectedGenre === 'All' || (b.genre || '').toLowerCase().includes(selectedGenre.toLowerCase()));
-
     const kw = keyword.toLowerCase();
-    const matches = pool.filter(b => (b.title || '').toLowerCase().includes(kw) || (b.author || '').toLowerCase().includes(kw));
-    return matches.slice(0, MAX_SUGGESTIONS);
+    const xhr = new XMLHttpRequest();
+    // For suggestions, we could use a separate action or just search with a limit
+    xhr.open("GET", `api.php?action=load&q=${encodeURIComponent(kw)}&limit=${MAX_SUGGESTIONS}`, false); // Synchronous for simplicity in current flow
+    xhr.send();
+    if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        return data.books || [];
+    }
+    return [];
 }
 
 function updateSuggestions() {
@@ -513,13 +452,12 @@ function displayBooks() {
     // If no books match the current filters, show "No result found."
     if (!filteredBooks || filteredBooks.length === 0) {
         container.innerHTML = '<div class="col-12 text-center my-5 reveal-item is-visible"><h3 style="color: #c5a059;">No result found.</h3></div>';
-        // still update pagination (will hide when 0 pages)
         createPagination();
         return;
     }
 
-    const start = (currentPage - 1) * booksPerPage;
-    const paginated = filteredBooks.slice(start, start + booksPerPage);
+    // Books are now pre-paginated from server
+    const paginated = filteredBooks;
 
     // Loop through filtered/paginated books and create Bootstrap card HTML
     paginated.forEach(book => {
@@ -666,7 +604,7 @@ function reserveBook(id) {
         return;
     }
 
-    const book = books.find(b => b.id === id);
+    const book = filteredBooks.find(b => b.id === id);
     if (!book) return;
     if (book.stock <= 0) {
         showToast('This book is currently unavailable.', 'error');
@@ -718,12 +656,12 @@ function hideReserveModal() {
 function doConfirmReserve(days) {
     // Front-end only: create a UI reservation, persist it, and close the modal.
     const id = pendingReserveId;
-    const bookIndex = books.findIndex(b => b.id === id);
+    const bookIndex = filteredBooks.findIndex(b => b.id === id);
     if (bookIndex === -1) {
         hideReserveModal();
         return;
     }
-    const book = books[bookIndex];
+    const book = filteredBooks[bookIndex];
 
     const d = parseInt(days, 10) || 1;
     const daysClamped = Math.max(1, Math.min(15, d));
@@ -869,21 +807,21 @@ function changeReservationQty(bookId, delta) {
     const idx = reservations.findIndex(r => r.id === bookId);
     if (idx === -1) return;
     const res = reservations[idx];
-    const bookIndex = books.findIndex(b => b.id === bookId);
+    const bookIndex = filteredBooks.findIndex(b => b.id === bookId);
     if (delta > 0) {
         // increase: ensure stock available
-        if (bookIndex === -1 || books[bookIndex].stock <= 0) {
+        if (bookIndex === -1 || filteredBooks[bookIndex].stock <= 0) {
             showToast('No more copies available to reserve.', 'error');
             return;
         }
         res.qty = (res.qty || 1) + 1;
-        books[bookIndex].stock--;
+        filteredBooks[bookIndex].stock--;
         reservedCount++;
     } else {
         // decrease
         res.qty = (res.qty || 1) - 1;
         // restore stock
-        if (bookIndex !== -1) books[bookIndex].stock = (books[bookIndex].stock || 0) + 1;
+        if (bookIndex !== -1) filteredBooks[bookIndex].stock = (filteredBooks[bookIndex].stock || 0) + 1;
         reservedCount = Math.max(0, reservedCount - 1);
         if (res.qty <= 0) {
             // remove reservation
@@ -923,9 +861,9 @@ function cancelReservation(bookId) {
     // ask for confirmation before cancelling (use in-page modal)
     showConfirm(`Cancel reservation for "${res.title}" due ${res.dueDate}?`, function () {
         // yes: restore stock for the book (restore qty)
-        const bookIndex = books.findIndex(b => b.id === res.id);
+        const bookIndex = filteredBooks.findIndex(b => b.id === res.id);
         if (bookIndex !== -1) {
-            books[bookIndex].stock = (books[bookIndex].stock || 0) + (res.qty || 1);
+            filteredBooks[bookIndex].stock = (filteredBooks[bookIndex].stock || 0) + (res.qty || 1);
         }
 
         // remove reservation
@@ -947,7 +885,7 @@ function createPagination() {
     if (!pagination) return;
 
     pagination.innerHTML = "";
-    const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
+    const totalPages = Math.ceil(totalBooks / booksPerPage);
     if (totalPages <= 1) return;
 
     const ul = document.createElement('ul');
@@ -973,7 +911,7 @@ function createPagination() {
                 // Update content at the "mid-point" of the roll (approx 400ms)
                 setTimeout(() => {
                     currentPage = i;
-                    displayBooks();
+                    fetchLibraryData();
                     window.scrollTo({ top: 300, behavior: 'smooth' });
                 }, 400);
 
@@ -983,7 +921,7 @@ function createPagination() {
                 }, 800);
             } else {
                 currentPage = i;
-                displayBooks();
+                fetchLibraryData();
                 window.scrollTo({ top: 300, behavior: 'smooth' });
             }
         });
@@ -998,30 +936,14 @@ function updateStats() {
     const total = document.getElementById("totalBooks");
     const reserved = document.getElementById("reservedCount");
 
-    if (total) total.innerText = `Total Books: ${books.length}`;
+    if (total) total.innerText = `Total Books: ${totalBooks}`;
     if (reserved) reserved.innerText = `Reserved: ${reservedCount}`;
 }
 
 // Apply both search keyword and genre filters
 function applyFilters() {
-    const searchInput = document.getElementById('searchInput');
-    const genreSelect = document.getElementById('genreSelect');
-    const keyword = searchInput ? searchInput.value.toLowerCase() : '';
-    const selectedGenre = genreSelect ? genreSelect.value : 'All';
-
-    filteredBooks = books.filter(book => {
-        const title = (book.title || '').toLowerCase();
-        const author = (book.author || '').toLowerCase();
-        const bookGenre = (book.genre || '').toLowerCase();
-
-        const matchesKeyword = title.includes(keyword) || author.includes(keyword);
-        const matchesGenre = selectedGenre === 'All' || bookGenre.includes(selectedGenre.toLowerCase());
-
-        return matchesKeyword && matchesGenre;
-    });
-
     currentPage = 1; // reset paging
-    displayBooks();
+    fetchLibraryData();
 }
 // --- AUTHENTICATION INTEGRATION ---
 
