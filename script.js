@@ -155,7 +155,46 @@ function loadFromStorage() {
     reservedCount = Array.isArray(reservations) && reservations.length > 0
         ? reservations.reduce((sum, r) => sum + (r.qty || 1), 0)
         : 0;
+
+    // AJAX CONVERSION: Background fetch to synchronize and retrieve the latest records from the remote database
+    const xhr = new XMLHttpRequest();
+    // FIX: Point to the centralized PHP backend
+    xhr.open("GET", "api.php?action=load", true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    const serverData = JSON.parse(xhr.responseText);
+                    // FIX: Ensure serverData has the expected structure before applying
+                    if (serverData.books && Array.isArray(serverData.books) && serverData.books.length > 0) {
+                        // FIX: Synchronize global 'books' and 'reservations' arrays with server data
+                        books = serverData.books;
+                        reservations = serverData.reservations || [];
+                        reservedCount = serverData.reservedCount || 0;
+
+                        // Update fallback storage with fresh server data immediately
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+                        localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations));
+                        localStorage.setItem(RESERVED_KEY, String(reservedCount));
+
+                        // FIX: Immediately re-apply filters and re-render the UI to reflect server state
+                        applyFilters();
+                        updateStats();
+                        renderReservations();
+                        renderCartPanel();
+                    }
+                } catch (error) {
+                    console.warn("Error parsing AJAX server data", error);
+                }
+            } else {
+                // FIX: Log server errors for easier debugging
+                console.error("Failed to load library data from server. Status:", xhr.status);
+            }
+        }
+    };
+    xhr.send();
 }
+
 
 function saveToStorage() {
     try {
@@ -165,7 +204,25 @@ function saveToStorage() {
     } catch (e) {
         console.warn('Could not save to localStorage', e);
     }
+
+    // AJAX CONVERSION: Send data to a backend server to persist library state
+    const xhr = new XMLHttpRequest();
+    // FIX: Point to the centralized PHP backend
+    xhr.open("POST", "api.php?action=save", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    // FIX: Handle response to verify persistence
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status !== 200) {
+            console.error("AJAX Save Failed: Server returned status " + xhr.status);
+        }
+    };
+    xhr.send(JSON.stringify({
+        books: books,
+        reservations: reservations,
+        reservedCount: reservedCount
+    }));
 }
+
 
 const genres = [
     "Biography",
@@ -996,6 +1053,20 @@ function handleAuthAction() {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
     if (isLoggedIn) {
+        // AJAX CONVERSION: Notify the backend server to securely invalidate the user's session
+        const xhr = new XMLHttpRequest();
+        // FIX: Point to the centralized PHP backend
+        xhr.open("POST", "api.php?action=logout", true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        // FIX: Handle response
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status !== 200) {
+                console.warn("AJAX Logout Notification Failed: Status " + xhr.status);
+            }
+        };
+        // A minimal payload tracking who logged out could go here
+        xhr.send(JSON.stringify({ action: 'logout' }));
+
         // Logout Process
         localStorage.removeItem('isLoggedIn');
 

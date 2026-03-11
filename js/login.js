@@ -214,22 +214,29 @@
       });
 
       if (!response.ok) {
-        throw new Error(`Status ${response.status}`);
+        // FIX: If the file is missing (404), it's likely a local dev environment issue; otherwise, throw
+        if (response.status === 404) {
+          console.info("users.json not found on server, using local guest fallback.");
+        } else {
+          throw new Error(`Server returned status ${response.status}`);
+        }
+      } else {
+        const data = await response.json();
+        return data.users;
       }
-
-      const data = await response.json();
-      return data.users;
     } catch (err) {
-      // If fetch fails (CORS, file:// protocol, 404), we fallback to a hardcoded
-      // guest credential to allow the assignment to remain functional locally.
-      console.warn("External credentials could not be loaded, using local fallback.", err);
-      return [
-        {
-          username: "curator",
-          password: "AuroraTree!23",
-        },
-      ];
+      // FIX: Improved error logging to distinguish between network failure and intentional fallback
+      console.warn("Credential fetch failed. Using local curator fallback.", err.message);
     }
+
+    // Fallback included for local file access (file:// protocol) where fetch is blocked, 
+    // or when data/users.json is not present on the server.
+    return [
+      {
+        username: "curator",
+        password: "AuroraTree!23",
+      },
+    ];
   }
 
   /**
