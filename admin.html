@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&family=Metamorphous&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&family=Metamorphous&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
         :root {
@@ -24,7 +27,11 @@
             min-height: 100vh;
         }
 
-        h1, h2, h3, h4, .cinzel {
+        h1,
+        h2,
+        h3,
+        h4,
+        .cinzel {
             font-family: 'Cinzel', serif;
             color: var(--primary-gold);
         }
@@ -69,7 +76,8 @@
             margin-right: 0.5rem;
         }
 
-        .tab-btn:hover, .tab-btn.active {
+        .tab-btn:hover,
+        .tab-btn.active {
             background: var(--primary-gold);
             color: var(--dark-bg);
         }
@@ -145,18 +153,26 @@
         }
 
         .add-book-form {
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.2);
             padding: 2rem;
             border: 1px solid #444;
             margin-bottom: 2rem;
         }
 
         @media (max-width: 768px) {
-            .tab-buttons { display: flex; flex-direction: column; gap: 10px; }
-            .tab-btn { margin-right: 0; }
+            .tab-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .tab-btn {
+                margin-right: 0;
+            }
         }
     </style>
 </head>
+
 <body>
     <nav class="admin-navbar">
         <div class="container">
@@ -212,9 +228,10 @@
             <div class="dashboard-card">
                 <div class="card-header-premium d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Library Books</h3>
-                    <button class="btn btn-gold btn-sm btn-premium-action" onclick="toggleBookForm()">+ Add New Book</button>
+                    <button class="btn btn-gold btn-sm btn-premium-action" onclick="toggleBookForm()">+ Add New
+                        Book</button>
                 </div>
-                
+
                 <!-- This is the part where you see all the books currently in the archive -->
                 <div class="card-body">
                     <!-- ADD NEW BOOK FORM: This box appears when you click "+ Add New Book" -->
@@ -235,19 +252,24 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small">Stock (How many books?)</label>
-                                <input type="number" id="book-stock" class="form-control form-control-premium" value="1">
+                                <input type="number" id="book-stock" class="form-control form-control-premium"
+                                    value="1">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small">Image Path (e.g. img/book.jpg)</label>
-                                <input type="text" id="book-image" class="form-control form-control-premium" placeholder="img/cover.jpg">
+                                <input type="text" id="book-image" class="form-control form-control-premium"
+                                    placeholder="img/cover.jpg">
                             </div>
                             <div class="col-12">
                                 <label class="form-label small">Summary (Short story about the book)</label>
-                                <textarea id="book-summary" class="form-control form-control-premium" rows="3"></textarea>
+                                <textarea id="book-summary" class="form-control form-control-premium"
+                                    rows="3"></textarea>
                             </div>
                             <div class="col-12 text-end">
-                                <button class="btn btn-secondary btn-sm me-2 btn-premium-action cinzel" onclick="toggleBookForm()">Cancel</button>
-                                <button class="btn btn-gold btn-sm btn-premium-action cinzel" onclick="addBook()">Save Book</button>
+                                <button class="btn btn-secondary btn-sm me-2 btn-premium-action cinzel"
+                                    onclick="toggleBookForm()">Cancel</button>
+                                <button class="btn btn-gold btn-sm btn-premium-action cinzel" onclick="addBook()">Save
+                                    Book</button>
                             </div>
                         </div>
                     </div>
@@ -288,4 +310,5 @@
         }
     </script>
 </body>
+
 </html>

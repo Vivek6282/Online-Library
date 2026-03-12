@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (signupForm) {
         signupForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            
+
             const idNo = document.getElementById("signup-id-no").value.trim();
             const fullName = document.getElementById("signup-name").value.trim();
             const email = document.getElementById("signup-email").value.trim();
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     localStorage.setItem("userIdNo", result.user.id_no);
                     localStorage.setItem("userName", result.user.full_name);
                     localStorage.setItem("userRole", result.user.role || 'user');
-                    
+
                     // After a short delay, redirect the user based on their role
                     setTimeout(() => {
                         if (result.user.role === 'admin') {
