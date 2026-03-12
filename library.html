@@ -4,13 +4,13 @@
 <head>
     <!-- This is the title of the Library page -->
     <title>The Book Archive</title>
-    
+
     <!-- Makes the page fit correctly on mobile phones and big monitors -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <!-- Bootstrap: This helps us create the layout and buttons quickly -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Our custom design (colors, fonts, etc.) -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -30,7 +30,7 @@
 
     <!-- THE HEADER: The top section of the page -->
     <header class="library-header">
-        
+
         <!-- Top Bar: Contains the "Return" link and the Login/Logout button -->
         <nav class="navbar navbar-expand-lg archival-nav-top py-lg-2 py-1 px-3 reveal-item delay-1">
             <div class="container-fluid p-0">
@@ -51,7 +51,7 @@
         <!-- Search and Filters: Where you look for specific books -->
         <div class="header-tier-bottom container pb-lg-3 pb-2 reveal-item delay-3">
             <div class="row g-1 g-md-3 align-items-center">
-                
+
                 <!-- Genre Filter: Choose between Fantasy, History, etc. -->
                 <div class="col-6 col-md-auto">
                     <select id="genreSelect" class="form-select archival-select-sm">
@@ -70,9 +70,11 @@
                 <!-- Search Input: Type the name of a book here -->
                 <div class="col-6 col-md">
                     <div class="search-input-group-archival">
-                        <input type="text" id="searchInput" class="form-control archival-input-sm" placeholder="Search the Archive...">
+                        <input type="text" id="searchInput" class="form-control archival-input-sm"
+                            placeholder="Search the Archive...">
                         <!-- Suggestions: Shows book names as you type -->
-                        <ul id="suggestions" class="suggestions-list-archival" role="listbox" hidden aria-hidden="true"></ul>
+                        <ul id="suggestions" class="suggestions-list-archival" role="listbox" hidden aria-hidden="true">
+                        </ul>
                     </div>
                 </div>
 
@@ -81,13 +83,26 @@
                     <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-4">
                         <div class="social-row-archival">
                             <a href="#" class="social-link-archival" aria-label="Facebook">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                                </svg>
                             </a>
                             <a href="#" class="social-link-archival" aria-label="Instagram">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><circle cx="12" cy="12" r="4.5" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                    <circle cx="12" cy="12" r="4.5" />
+                                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                                </svg>
                             </a>
                             <a href="#" class="social-link-archival" aria-label="X">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg>
                             </a>
                         </div>
                         <!-- Cart: Clicking this shows your reserved books -->
@@ -110,7 +125,7 @@
 
         <!-- This empty div is filled with books by the "script.js" file -->
         <div id="bookContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
-        
+
         <!-- Pagination: Lets you switch between Page 1, 2, etc. -->
         <nav id="pagination" aria-label="Books pagination" class="mt-4"></nav>
     </main>
