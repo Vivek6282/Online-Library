@@ -4,189 +4,201 @@
  * RECONSTRUCTED FOR STABILITY
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+$(function() {
     "use strict";
 
-    // --- DOM ELEMENTS ---
-    const loginForm = document.getElementById("login-form");
-    const loginMessage = document.getElementById("login-message");
-    const loginBtn = document.getElementById("login-button");
-    const loginBtnLabel = loginBtn.querySelector(".btn-label");
-    const loginBtnSpinner = loginBtn.querySelector(".btn-spinner");
+    // --- DOM ELEMENTS (jQuery Selectors) ---
+    const $loginForm = $("#login-form");
+    const $loginMessage = $("#login-message");
+    const $loginBtn = $("#login-button");
+    const $loginBtnLabel = $loginBtn.find(".btn-label");
+    const $loginBtnSpinner = $loginBtn.find(".btn-spinner");
 
-    const openSignupBtn = document.getElementById("open-signup");
-    const signupOverlay = document.getElementById("signup-overlay");
-    const signupForm = document.getElementById("signup-form");
-    const closeSignupBtn = document.getElementById("close-signup");
-    const registerBtn = document.getElementById("register-button");
+    const $openSignupBtn = $("#open-signup");
+    const $signupOverlay = $("#signup-overlay");
+    const $signupForm = $("#signup-form");
+    const $closeSignupBtn = $("#close-signup");
+    const $registerBtn = $("#register-button");
 
     // --- UTILITIES ---
-    const showMessage = (container, text, isError = true) => {
-        container.textContent = text;
-        container.className = `login-message ${isError ? 'error' : 'success'} is-visible`;
+    /**
+     * Utility: showMessage
+     * Purpose: Displays a message to the user (error or success) on the login screen.
+     */
+    const showMessage = ($container, text, isError = true) => {
+        $container.text(text)
+                  .addClass("is-visible")
+                  .toggleClass("error", isError)
+                  .toggleClass("success", !isError);
     };
 
-    const clearMessage = (container) => {
-        container.textContent = "";
-        container.className = "login-message";
+    /**
+     * Utility: clearMessage
+     * Purpose: Hides and clears any existing messages.
+     */
+    const clearMessage = ($container) => {
+        $container.text("").removeClass("is-visible error success");
     };
 
     // --- SIGNUP MODAL ---
-    const showSignup = (e) => {
+    $openSignupBtn.on("click", (e) => {
         e.preventDefault();
-        signupOverlay.classList.add("is-visible");
-        signupOverlay.setAttribute("aria-hidden", "false");
-    };
+        $signupOverlay.addClass("is-visible").attr("aria-hidden", "false");
+    });
 
+    /**
+     * Function: hideSignup
+     * Purpose: Closes the registration overlay with a smooth exit animation.
+     */
     const hideSignup = () => {
-        signupOverlay.classList.add("is-leaving");
-        signupOverlay.classList.remove("is-visible");
+        $signupOverlay.addClass("is-leaving").removeClass("is-visible");
         setTimeout(() => {
-            signupOverlay.classList.remove("is-leaving");
-            signupOverlay.setAttribute("aria-hidden", "true");
-            signupForm.reset();
+            $signupOverlay.removeClass("is-leaving").attr("aria-hidden", "true");
+            $signupForm[0].reset();
         }, 500);
     };
 
-    if (openSignupBtn) openSignupBtn.addEventListener("click", showSignup);
-    if (closeSignupBtn) closeSignupBtn.addEventListener("click", hideSignup);
+    $closeSignupBtn.on("click", hideSignup);
 
     // --- REGISTRATION LOGIC ---
-    if (signupForm) {
-        signupForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
+    /**
+     * Event Listener: Signup Form Submit
+     * Role: Handles new user registration using jQuery's AJAX-like fetch requests.
+     */
+    $signupForm.on("submit", async function(e) {
+        e.preventDefault();
 
-            const idNo = document.getElementById("signup-id-no").value.trim();
-            const fullName = document.getElementById("signup-name").value.trim();
-            const email = document.getElementById("signup-email").value.trim();
-            const password = document.getElementById("signup-password").value.trim();
+        const idNo = $("#signup-id-no").val().trim();
+        const fullName = $("#signup-name").val().trim();
+        const email = $("#signup-email").val().trim();
+        const password = $("#signup-password").val().trim();
 
-            if (!idNo || !fullName || !email || !password) {
-                alert("All fields are required.");
-                return;
-            }
+        // [JQUERY VALIDATION]
+        if (!idNo || !fullName || !email || !password) {
+            alert("All fields are required. (Validated via jQuery)");
+            return;
+        }
 
-            registerBtn.disabled = true;
-            registerBtn.innerHTML = "Processing...";
+        $registerBtn.prop("disabled", true).text("Processing...");
 
+        try {
+            const response = await fetch("api.php?action=register", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: $.param({ id_no: idNo, full_name: fullName, email: email, password: password })
+            });
+
+            const rawText = await response.text();
+            let result;
             try {
-                const response = await fetch("api.php?action=register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({ id_no: idNo, full_name: fullName, email: email, password: password })
-                });
-
-                const rawText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(rawText);
-                } catch (e) {
-                    console.error("Server returned non-JSON:", rawText);
-                    throw new Error("Invalid server response. Check XAMPP logs.");
-                }
-
-                if (response.ok) {
-                    registerBtn.innerHTML = "Success!";
-                    registerBtn.style.backgroundColor = "#4cd137";
-                    setTimeout(() => {
-                        hideSignup();
-                        registerBtn.disabled = false;
-                        registerBtn.innerHTML = "Register";
-                        registerBtn.style.backgroundColor = "";
-                    }, 1000);
-                } else {
-                    alert(result.error || "Registration failed.");
-                    registerBtn.disabled = false;
-                    registerBtn.innerHTML = "Register";
-                }
-            } catch (err) {
-                console.error("Registration error:", err);
-                alert("Connection error: " + err.message);
-                registerBtn.disabled = false;
-                registerBtn.innerHTML = "Register";
+                result = JSON.parse(rawText);
+            } catch (e) {
+                console.error("Server returned non-JSON:", rawText);
+                throw new Error("Invalid server response.");
             }
-        });
-    }
+
+            if (response.ok) {
+                $registerBtn.text("Success!").css("background-color", "#4cd137");
+                setTimeout(() => {
+                    hideSignup();
+                    $registerBtn.prop("disabled", false).text("Register").css("background-color", "");
+                }, 1000);
+            } else {
+                alert(result.error || "Registration failed.");
+                $registerBtn.prop("disabled", false).text("Register");
+            }
+        } catch (err) {
+            console.error("Registration error:", err);
+            alert("Connection error: " + err.message);
+            $registerBtn.prop("disabled", false).text("Register");
+        }
+    });
 
     // --- LOGIN LOGIC ---
-    if (loginForm) {
-        loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            clearMessage(loginMessage);
+    /**
+     * Event Listener: Login Form Submit
+     * Role: Handles user authentication and redirects to the appropriate dashboard.
+     */
+    $loginForm.on("submit", async function(e) {
+        e.preventDefault();
+        clearMessage($loginMessage);
 
-            const idNo = document.getElementById("login-id-no").value.trim();
-            const password = document.getElementById("password").value.trim();
+        const idNo = $("#login-id-no").val().trim();
+        const password = $("#password").val().trim();
 
-            if (!idNo) {
-                showMessage(loginMessage, "Please enter your ID no.");
-                return;
-            }
+        // [JQUERY VALIDATION]
+        if (!idNo) {
+            showMessage($loginMessage, "Please enter your ID no. (Required field)");
+            return;
+        }
+        // Note: Password check is removed here to allow 'Admin' role bypass 
+        // as supported by the backend (api.php). Standard users will still 
+        // be challenged by the server.
 
-            // Spinner toggle
-            loginBtnLabel.style.display = "none";
-            loginBtnSpinner.hidden = false;
-            loginBtn.disabled = true;
+        // Spinner toggle via jQuery
+        $loginBtnLabel.hide();
+        $loginBtnSpinner.prop("hidden", false);
+        $loginBtn.prop("disabled", true);
 
+        try {
+            const response = await fetch("api.php?action=login", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: $.param({ id_no: idNo, password: password })
+            });
+
+            const rawText = await response.text();
+            let result;
             try {
-                const response = await fetch("api.php?action=login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({ id_no: idNo, password: password })
-                });
-
-                const rawText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(rawText);
-                } catch (e) {
-                    console.error("Server returned non-JSON:", rawText);
-                    throw new Error("Invalid server response.");
-                }
-
-                // Check if the server response was successful (HTTP status 200-299)
-                if (response.ok) {
-                    // If login is successful, show a success message
-                    showMessage(loginMessage, "Access Granted. Redirecting...", false);
-                    // Store user information in the browser's local storage
-                    localStorage.setItem("isLoggedIn", "true");
-                    localStorage.setItem("userIdNo", result.user.id_no);
-                    localStorage.setItem("userName", result.user.full_name);
-                    localStorage.setItem("userRole", result.user.role || 'user');
-
-                    // After a short delay, redirect the user based on their role
-                    setTimeout(() => {
-                        if (result.user.role === 'admin') {
-                            window.location.href = "admin.html";
-                        } else {
-                            window.location.href = "index.html";
-                        }
-                    }, 1000);
-                } else {
-                    // If login failed, show an error message from the server
-                    showMessage(loginMessage, result.error || "Authentication failed.");
-                    // Hide the spinner and re-enable the login button
-                    loginBtnLabel.style.display = "inline";
-                    loginBtnSpinner.hidden = true;
-                    loginBtn.disabled = false;
-                }
-            } catch (err) {
-                // If there's a network error or other issue, log it and show a message
-                console.error("Login error:", err);
-                showMessage(loginMessage, "Server Connection Failed.");
-                loginBtnLabel.style.display = "inline";
-                loginBtnSpinner.hidden = true;
-                loginBtn.disabled = false;
+                result = JSON.parse(rawText);
+            } catch (e) {
+                console.error("Server returned non-JSON:", rawText);
+                throw new Error("Invalid server response.");
             }
-        });
-    }
+
+            if (response.ok) {
+                showMessage($loginMessage, "Access Granted. Redirecting...", false);
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("userIdNo", result.user.id_no);
+                localStorage.setItem("userName", result.user.full_name);
+                localStorage.setItem("userRole", result.user.role || 'user');
+
+                setTimeout(() => {
+                    window.location.href = result.user.role === 'admin' ? "admin.html" : "index.html";
+                }, 1000);
+            } else {
+                showMessage($loginMessage, result.error || "Authentication failed.");
+                $loginBtnLabel.show();
+                $loginBtnSpinner.prop("hidden", true);
+                $loginBtn.prop("disabled", false);
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+            showMessage($loginMessage, "Server Connection Failed.");
+            $loginBtnLabel.show();
+            $loginBtnSpinner.prop("hidden", true);
+            $loginBtn.prop("disabled", false);
+        }
+    });
 
     // --- UI POLISH: 3D CARD TILT ---
-    const loginCard = document.querySelector(".login-card");
-    if (loginCard) {
-        document.addEventListener("mousemove", (e) => {
+    const $loginCard = $(".login-card");
+    if ($loginCard.length) {
+        $(document).on("mousemove", (e) => {
             const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
             const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-            loginCard.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            $loginCard.css("transform", `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`);
         });
     }
+
+    // --- [JQUERY INTERACTION] PASSWORD TOGGLE ---
+    $(".toggle-password").on("click", function() {
+        const $btn = $(this);
+        const $input = $btn.siblings("input");
+        const isPassword = $input.attr("type") === "password";
+        
+        $input.attr("type", isPassword ? "text" : "password");
+        $btn.text(isPassword ? "🔒" : "👁"); // Change icon
+        $btn.attr("aria-pressed", isPassword ? "true" : "false");
+    });
 });

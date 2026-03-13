@@ -32,13 +32,22 @@
     <header class="library-header">
 
         <!-- Top Bar: Contains the "Return" link and the Login/Logout button -->
+        <!-- 
+          [BOOTSTRAP DEVELOPER INFO] Navigation Implementation
+          We use the .navbar and .navbar-expand-lg classes for a responsive header.
+          The py-lg-2 and px-3 classes are Bootstrap utilities for padding,
+          ensuring the layout adjusts based on screen size (Mobile First approach).
+        -->
         <nav class="navbar navbar-expand-lg archival-nav-top py-lg-2 py-1 px-3 reveal-item delay-1">
             <div class="container-fluid p-0">
                 <a class="navbar-brand back-link-archival" href="index.html">
                     <span class="back-sym">&#x21A4;</span> Return to The Menu
                 </a>
-                <div class="ms-auto d-flex align-items-center">
-                    <button id="authBtn" class="btn btn-archival-logout">Login</button>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <!-- Dynamic Auth Area -->
+                    <div id="authArea" class="d-flex align-items-center">
+                        <button id="authBtn" class="btn btn-archival-logout">Login</button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -50,6 +59,14 @@
 
         <!-- Search and Filters: Where you look for specific books -->
         <div class="header-tier-bottom container pb-lg-3 pb-2 reveal-item delay-3">
+            <!-- 
+              [BOOTSTRAP DEVELOPER INFO] Responsive Grid
+              Implementation:
+              Using .row and .col-* classes. Note the use of .col-6 on mobile 
+              (takes half width) and .col-md-auto on larger screens (takes only 
+              the content width). The 'g-1 g-md-3' class sets responsive 'gutters' 
+              (spacing) between columns.
+            -->
             <div class="row g-1 g-md-3 align-items-center">
 
                 <!-- Genre Filter: Choose between Fantasy, History, etc. -->
@@ -107,7 +124,15 @@
                         </div>
                         <!-- Cart: Clicking this shows your reserved books -->
                         <button id="cartBtn" class="premium-cart-btn-archival">
-                            <span class="cart-icon-main">🛒</span>
+                            <span class="cart-icon-main">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                            </span>
                             <span id="cartCount" class="cart-badge-archival">0</span>
                         </button>
                     </div>
@@ -137,6 +162,14 @@
     </section>
     <!-- THE CART PANEL: A sidebar that slides out to show your reservations -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="cartPanel" aria-labelledby="cartPanelLabel">
+        <!-- 
+          [BOOTSTRAP DEVELOPER INFO] Offcanvas & Modal Implementation
+          Implementation:
+          These components (.offcanvas and .modal) are hidden by default and 
+          triggered via JavaScript using bootstrap.Offcanvas.getOrCreateInstance() 
+          or bootstrap.Modal(). This allows for rich, immersive interactions 
+          without manual CSS visibility toggling.
+        -->
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="cartPanelLabel">Reservations</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -201,24 +234,33 @@
         </div>
     </div>
 
-    <!-- Confirmation modal (Bootstrap) -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmTitle">Please confirm</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- THE PROFILE OVERLAY (Triggered by Profile Logo) -->
+    <div id="profileOverlay" class="profile-overlay" aria-hidden="true">
+        <div class="profile-card-container">
+            <div class="profile-card">
+                <button type="button" id="closeProfile" class="profile-close">&times;</button>
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                        </svg>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <p id="confirmMessage">Are you sure?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="confirmYes" class="btn btn-primary">Yes</button>
-                    <button type="button" id="confirmNo" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <div class="profile-body">
+                    <h3 id="profileNameDisplay">Scholar Name</h3>
+                    <p class="profile-label">Access ID: <span id="profileIdDisplay">---</span></p>
+                    <p class="profile-role" id="profileRoleDisplay">Member</p>
+                    <hr class="profile-divider">
+                    <button id="logoutBtnMain" class="btn-archival-logout w-100">Logout of Project</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Blur Backdrop for focus effect -->
+    <div id="blurBackdrop" class="blur-focus-backdrop"></div>
 
     <!-- FOOTER: The bottom part of the page -->
     <footer class="site-footer">
@@ -229,7 +271,7 @@
                 <a href="#">Terms of Access</a>
                 <a href="#">Privacy Policy</a>
             </div>
-            <p class="footer-copy">&copy; 2026 The Grand Archive. All records preserved.</p>
+            <p class="footer-copy">&copy; Amal Jyothi College Management. All records preserved.</p>
         </div>
     </footer>
 

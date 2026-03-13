@@ -122,6 +122,11 @@ function handleLoad($conn) {
     ]);
 }
 
+/**
+ * Function: handleSave
+ * Purpose: Synchronizes the frontend state (reservations, counts) with a local JSON file.
+ * Implementation: Decodes incoming JSON, merges with existing state, and writes to library_state.json.
+ */
 function handleSave($dataFile) {
     $input = file_get_contents('php://input');
     $incoming = json_decode($input, true);
@@ -161,10 +166,19 @@ function handleSave($dataFile) {
     }
 }
 
+/**
+ * Function: handleLogout
+ * Purpose: Simple endpoint to confirm logout request from frontend.
+ */
 function handleLogout() {
     echo json_encode(['success' => true, 'message' => 'Session terminated']);
 }
 
+/**
+ * Function: handleLogin
+ * Purpose: Authenticates users using ID Number and Password.
+ * Implementation: Checks database for ID, verifies password hash, and detects Admin role for bypass.
+ */
 function handleLogin($conn) {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
@@ -215,6 +229,11 @@ function handleLogin($conn) {
     $stmt->close();
 }
 
+/**
+ * Function: handleRegister
+ * Purpose: Creates a new user record in the database.
+ * Implementation: Validates input, checks for duplicate IDs, and hashes passwords before storage.
+ */
 function handleRegister($conn) {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
@@ -272,6 +291,10 @@ function handleRegister($conn) {
 
 // --- ADMIN SPECIFIC ACTIONS ---
 
+/**
+ * Function: handleGetUsers (Admin Only)
+ * Purpose: Retrieves a list of all registered users for administrative review.
+ */
 function handleGetUsers($conn) {
     $result = $conn->query("SELECT id, id_no, full_name, email, role, created_at FROM users");
     if (!$result) {
@@ -286,6 +309,10 @@ function handleGetUsers($conn) {
     echo json_encode(['success' => true, 'users' => $users]);
 }
 
+/**
+ * Function: handleDeleteUser (Admin Only)
+ * Purpose: Removes a user account from the system.
+ */
 function handleDeleteUser($conn) {
     $id = $_POST['id'] ?? '';
     if (empty($id)) {
@@ -304,6 +331,10 @@ function handleDeleteUser($conn) {
     $stmt->close();
 }
 
+/**
+ * Function: handleAddBook (Admin Only)
+ * Purpose: Inserts a new book record into the archive.
+ */
 function handleAddBook($conn) {
     $input = file_get_contents('php://input');
     $book = json_decode($input, true);
@@ -340,6 +371,10 @@ function handleAddBook($conn) {
     $stmt->close();
 }
 
+/**
+ * Function: handleDeleteBook (Admin Only)
+ * Purpose: Permanently removes a book record from the database.
+ */
 function handleDeleteBook($conn) {
     $id = $_GET['id'] ?? '';
     if (!$id) {

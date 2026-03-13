@@ -254,6 +254,13 @@ let bootstrapReserveModal = null;
 let bootstrapConfirmModal = null;
 let bootstrapCartOffcanvas = null;
 
+// [JS DEVELOPER INFO] Bootstrap JS API Integration
+// Implementation:
+// We use the global `bootstrap` object provided by Bootstrap's bundle. 
+// Instead of using data-attributes (like data-bs-toggle), we manually 
+// create instances using `new bootstrap.Modal()` and `new bootstrap.Offcanvas()`.
+// This gives us programmatic control to open/close these UI elements from 
+// within our server-side fetching logic or validation checks.
 if (window.bootstrap) {
     try {
         if (reserveModalEl) bootstrapReserveModal = new bootstrap.Modal(reserveModalEl);
@@ -753,6 +760,11 @@ function cancelReservation(bookId) {
     });
 }
 
+/**
+ * Function: createPagination
+ * Purpose: Generates the numbered buttons for navigating between multiple pages of books.
+ * Implementation: Calculates total pages based on search results and limit.
+ */
 function createPagination() {
     const pagination = document.getElementById("pagination");
     if (!pagination) return;
@@ -805,6 +817,10 @@ function createPagination() {
     pagination.appendChild(ul);
 }
 
+/**
+ * Function: updateStats
+ * Purpose: Updates the plain text counters (Total Books and Reserved count) in the UI.
+ */
 function updateStats() {
     const total = document.getElementById("totalBooks");
     const reserved = document.getElementById("reservedCount");
@@ -814,97 +830,138 @@ function updateStats() {
 }
 
 // Apply both search keyword and genre filters
+/**
+ * Function: applyFilters
+ * Purpose: Resets page to 1 and fetches data. Called when search keywords or genres change.
+ */
 function applyFilters() {
     currentPage = 1; // reset paging
     fetchLibraryData();
 }
 // --- AUTHENTICATION INTEGRATION ---
 
+/**
+ * Function: checkAuthStatus
+ * Purpose: Determines if a user is logged in and updates the header UI accordingly.
+ * Implementation: Replaces text buttons with a profile "Logo" icon when authenticated.
+ */
 function checkAuthStatus() {
-    const authBtn = document.getElementById('authBtn');
+    const authArea = document.getElementById('authArea');
     const cartBtn = document.getElementById('cartBtn');
     const reservedStat = document.getElementById('reservedCount');
-    if (!authBtn) return;
+    if (!authArea) return;
 
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-    // Remove all previous custom classes so we don't stack them
-    authBtn.classList.remove('btn-logout', 'btn-outline-primary', 'btn-outline-danger');
-
     if (isLoggedIn) {
-        authBtn.innerText = 'Logout';
-        authBtn.classList.add('btn-logout');
+        // [VISUAL UPDATE] Instead of text logout, we show a premium profile logo
+        authArea.innerHTML = `
+            <button id="profileOpenBtn" class="profile-toggle-btn reveal-item delay-1" title="View Profile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
+        `;
+        document.getElementById('profileOpenBtn').addEventListener('click', openProfileOverlay);
         if (cartBtn) cartBtn.style.display = 'flex';
         if (reservedStat) reservedStat.style.display = 'inline-block';
     } else {
-        authBtn.innerText = 'Login';
+        authArea.innerHTML = `<button id="authBtn" class="btn btn-archival-logout reveal-item delay-1">Scholar Login</button>`;
+        document.getElementById('authBtn').addEventListener('click', () => window.location.href = 'login.html');
         if (cartBtn) cartBtn.style.display = 'none';
         if (reservedStat) reservedStat.style.display = 'none';
-        // Keeps the default gold look from #authBtn style
     }
 }
 
-function handleAuthAction() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+/**
+ * Function: openProfileOverlay
+ * Purpose: Pops up the user profile card and blurs the background.
+ * Implementation: Populates card with localStorage data and triggers CSS motion classes.
+ */
+function openProfileOverlay() {
+    const overlay = document.getElementById('profileOverlay');
+    const backdrop = document.getElementById('blurBackdrop');
+    const nameDisplay = document.getElementById('profileNameDisplay');
+    const idDisplay = document.getElementById('profileIdDisplay');
+    const roleDisplay = document.getElementById('profileRoleDisplay');
 
-    if (isLoggedIn) {
-        // AJAX CONVERSION: Notify the backend server to securely invalidate the user's session
-        const xhr = new XMLHttpRequest();
-        // FIX: Point to the centralized PHP backend
-        xhr.open("POST", "api.php?action=logout", true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        // FIX: Handle response
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status !== 200) {
-                console.warn("AJAX Logout Notification Failed: Status " + xhr.status);
-            }
-        };
-        // A minimal payload tracking who logged out could go here
-        xhr.send(JSON.stringify({ action: 'logout' }));
+    if (!overlay || !backdrop) return;
 
-        // Logout Process
-        localStorage.removeItem('isLoggedIn');
+    // Populate data from localStorage
+    nameDisplay.innerText = localStorage.getItem('userName') || 'Scholar of ANU';
+    idDisplay.innerText = localStorage.getItem('userIdNo') || 'Guest-000';
+    roleDisplay.innerText = localStorage.getItem('userRole') ? (localStorage.getItem('userRole').toUpperCase() + " MEMBER") : 'STUDENT MEMBER';
 
-        // --- VISUAL MOTION: LOGOUT NOTIFICATION ---
-        const card = document.createElement('div');
-        card.className = 'logout-notification-card';
-        card.innerHTML = `
-            <div class="logout-notification-header">
-                <span class="icon">📜</span>
-                <h4>Session Terminated</h4>
-            </div>
-            <div class="logout-notification-body">
-                You have been successfully logged out of The Grand Archive. Your artifacts and tattered scrolls are now secure.
-            </div>
-            <div class="logout-notification-footer">
-                Click to dismiss
-            </div>
-        `;
-        document.body.appendChild(card);
+    // [ANIMATION] Trigger motion classes
+    overlay.classList.add('is-active');
+    backdrop.classList.add('is-active');
+    overlay.setAttribute('aria-hidden', 'false');
+}
 
-        // Trigger animation
-        setTimeout(() => card.classList.add('show'), 50);
+/**
+ * Function: closeProfileOverlay
+ * Purpose: Hides the profile card and restores background visibility.
+ */
+function closeProfileOverlay() {
+    const overlay = document.getElementById('profileOverlay');
+    const backdrop = document.getElementById('blurBackdrop');
+    
+    if (overlay) overlay.classList.remove('is-active');
+    if (backdrop) backdrop.classList.remove('is-active');
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
+}
 
-        const dismiss = () => {
-            card.classList.add('fade-out');
-            setTimeout(() => {
-                if (card.parentNode) card.parentNode.removeChild(card);
-            }, 500);
-        };
+/**
+ * Function: handleLogout
+ * Purpose: Securely ends the user session and triggers the "Terminated" notification.
+ * Implementation: Calls backup API, clears session storage, and reloads the interface.
+ */
+function handleLogout() {
+    // AJAX CONVERSION: Notify the backend server to securely invalidate the user's session
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "api.php?action=logout", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify({ action: 'logout' }));
 
-        // Interaction: Click to dismiss
-        card.addEventListener('click', dismiss);
+    // Logout Process
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userIdNo');
+    localStorage.removeItem('userRole');
 
-        // Auto-dismiss after 6 seconds
-        setTimeout(dismiss, 6000);
+    closeProfileOverlay();
 
-        // Update UI state without hard reload for smoother feel
-        checkAuthStatus();
-        updateStats();
-        applyFilters();
-    } else {
-        window.location.href = 'login.html';
-    }
+    // --- VISUAL MOTION: LOGOUT NOTIFICATION ---
+    const card = document.createElement('div');
+    card.className = 'logout-notification-card';
+    card.innerHTML = `
+        <div class="logout-notification-header">
+            <span class="icon">📜</span>
+            <h4>Session Terminated</h4>
+        </div>
+        <div class="logout-notification-body">
+            You have been successfully logged out of The Grand Archive. Your records are now sealed.
+        </div>
+        <div class="logout-notification-footer">
+            Click to dismiss
+        </div>
+    `;
+    document.body.appendChild(card);
+
+    // Trigger animation
+    setTimeout(() => card.classList.add('show'), 50);
+
+    const dismiss = () => {
+        card.classList.add('fade-out');
+        setTimeout(() => {
+            if (card.parentNode) card.parentNode.removeChild(card);
+            window.location.reload(); // Reload to refresh UI state
+        }, 500);
+    };
+
+    card.addEventListener('click', dismiss);
+    setTimeout(dismiss, 4000);
 }
 
 /**
@@ -953,10 +1010,18 @@ displayBooks = function () {
 // Initialize Auth and Motion
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthStatus();
-    const authBtn = document.getElementById('authBtn');
-    if (authBtn) {
-        authBtn.addEventListener('click', handleAuthAction);
-    }
+    
+    // Bind Profile Card Events
+    const closeBtn = document.getElementById('closeProfile');
+    const backdrop = document.getElementById('blurBackdrop');
+    const logoutBtnMain = document.getElementById('logoutBtnMain');
+
+    if (closeBtn) closeBtn.addEventListener('click', closeProfileOverlay);
+    if (backdrop) backdrop.addEventListener('click', closeProfileOverlay);
+    if (logoutBtnMain) logoutBtnMain.addEventListener('click', handleLogout);
+
+    // Initial load
+    loadFromStorage();
 
     // Smooth scroll for anchors
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

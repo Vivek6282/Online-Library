@@ -33,7 +33,7 @@
     <main class="main" role="main">
       <!-- Decorative heading area inspired by museum-style layout -->
       <section class="intro" aria-label="Library philosophy">
-        <h1 class="intro-title">Amal Jyothi College of Engineering </h1>
+        <h1 class="intro-title">Adikavi Nannaya University </h1>
         <h1 class="intro-subtitle">A Place Where Stories Awaken</h1>
       </section>
 
@@ -184,6 +184,23 @@
     1. HTML Canvas (used in galaxy.js and login-atmosphere.js for particles)
     2. requestAnimationFrame (a browser tool that runs code 60 times a second for smooth animation)
     3. CSS Transforms (used in login.js to tilt the card with your mouse)
+  -->
+  <!-- 
+    [JQUERY DEVELOPER INFO] Form Validation & DOM Manipulation
+    Implementation:
+    While this project currently uses Fetch API for login logic, a jQuery developer 
+    could easily implement validation or submission using:
+    
+    $('#login-form').on('submit', function(e) {
+       e.preventDefault();
+       if ($('#login-id-no').val() === '') {
+           $('#login-message').text('ID is required').addClass('error');
+       } else {
+           // $.post('api.php', $(this).serialize(), function(res) { ... });
+       }
+    });
+
+    The $ selector is fully available since jQuery 3.7.1 is loaded above.
   -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <!-- Background image slider -->

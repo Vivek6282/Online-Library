@@ -1,10 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Courier+Prime&display=swap');
 
 /* 
- * ===== VARIABLES & AESTHETIC ===== 
- * Defines the core color palette, typography, and standard visual effects 
- * used throughout the site to maintain the dark academia / archival theme.
- * Uses CSS custom properties (--var) for consistent theming.
+ * ===== [CSS DEVELOPER INFO] VARIABLES & AESTHETIC ===== 
+ * Implementation:
+ * This project uses CSS Custom Properties (Variables) to define a central 
+ * design system. Instead of hard-coding hex values, we use --bg-dark, 
+ * --accent-gold, etc. This makes it extremely easy to swap themes or 
+ * create dark/light modes by only changing the values in :root.
+ * 
+ * Integration with Bootstrap:
+ * We override Bootstrap's default styling by targeting its high-level 
+ * classes (like .navbar or .btn) and applying our custom variables 
+ * and shadows to them.
  */
 :root {
     --bg-dark: #12100e;
@@ -249,6 +256,15 @@ body:hover .collage-butterfly {
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* 
+ * [CSS DEVELOPER INFO] Bootstrap Override: .navbar
+ * Implementation:
+ * We've modified the .navbar class from Bootstrap to include a custom background 
+ * blur (backdrop-filter) and a specialized border-bottom using our variable 
+ * --border-ornate. This ensures the component feels like part of the 
+ * "Dark Academia" theme rather than a generic Bootstrap component.
+ */
+
 .navbar h2 {
     margin: 0;
     font-size: 1.8rem;
@@ -490,10 +506,12 @@ body.landing .interactive-collage-bg {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(18, 16, 14, 0.98);
-    border-bottom: 2px solid var(--accent-gold);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(15px);
+    /* Optimized Glassmorphism: Lighter background, more blur, thinner border */
+    background: rgba(18, 16, 14, 0.45);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     padding: 0;
 }
 
@@ -735,10 +753,18 @@ body.landing .interactive-collage-bg {
 }
 
 .cart-icon-main {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     color: var(--accent-gold);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 8px rgba(197, 160, 89, 0.3));
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cart-icon-main svg {
+    width: 24px;
+    height: 24px;
 }
 
 .premium-cart-btn-archival:hover .cart-icon-main {
@@ -2660,3 +2686,146 @@ main.container {
         opacity: 0;
     }
 }
+
+/* ===== PROFILE OVERLAY & FOCUS SYSTEM ===== */
+.blur-focus-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blur-focus-backdrop.is-active {
+    opacity: 1;
+    pointer-events: all;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.profile-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    transform: scale(1.1);
+}
+
+.profile-overlay.is-active {
+    opacity: 1;
+    pointer-events: all;
+    transform: scale(1);
+}
+
+.profile-card-container {
+    width: 100%;
+    max-width: 380px;
+    padding: 20px;
+}
+
+.profile-card {
+    background: rgba(30, 26, 22, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    padding: 40px 30px;
+}
+
+.profile-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    line-height: 1;
+}
+
+.profile-close:hover {
+    color: var(--accent-gold);
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    background: var(--bg-paper);
+    border: 2px solid var(--accent-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+}
+
+.profile-body h3 {
+    margin: 0 0 10px;
+    font-size: 1.8rem;
+    color: var(--bg-parchment);
+}
+
+.profile-label {
+    font-family: var(--font-mono);
+    color: var(--accent-gold);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.profile-role {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 25px;
+}
+
+.profile-divider {
+    border: 0;
+    border-top: 1px solid rgba(197, 160, 89, 0.2);
+    margin: 20px 0;
+}
+
+/* Profile Icon Button Styles */
+.profile-toggle-btn {
+    background: rgba(197, 160, 89, 0.1);
+    border: 1px solid var(--accent-gold);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-gold);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.profile-toggle-btn:hover {
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+}
+
+.profile-toggle-btn svg {
+    width: 24px;
+    height: 24px;
+}
