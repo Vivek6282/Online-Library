@@ -667,15 +667,14 @@ function renderCartPanel() {
     // List each book in your cart with its return date
     reservations.forEach(r => {
         const item = document.createElement('div');
-        item.className = 'cart-item mb-3 p-2 border-bottom';
-        item.style.color = '#f5e6d3';
+        item.className = 'cart-item mb-3 p-3';
         item.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <strong>${r.title}</strong><br>
-                    <small>Returns on: ${r.dueDate}</small>
+                    <strong>${r.title}</strong>
+                    <small class="d-block mt-1">Due Date: ${r.dueDate}</small>
                 </div>
-                <button class="btn btn-sm btn-outline-danger" onclick="cancelReservation(${r.id})">Remove</button>
+                <button class="btn btn-sm btn-archival-cancel" onclick="cancelReservation(${r.id})">Remove</button>
             </div>
         `;
         listEl.appendChild(item);

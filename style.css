@@ -2828,4 +2828,87 @@ main.container {
 .profile-toggle-btn svg {
     width: 24px;
     height: 24px;
-}
+}
+
+/* --- CART (RESERVATIONS) PANEL STYLING --- */
+.offcanvas#cartPanel {
+    background-color: var(--bg-parchment) !important;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E") !important;
+    border-left: 3px solid var(--accent-gold);
+    color: var(--text-dark) !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.offcanvas-header {
+    border-bottom: 2px solid rgba(44, 36, 27, 0.1);
+    background: rgba(197, 160, 89, 0.05);
+}
+
+.offcanvas-title {
+    font-family: var(--font-heading);
+    color: var(--accent-crimson);
+    letter-spacing: 3px;
+    font-weight: 700;
+}
+
+.cart-list {
+    padding: 10px 0;
+}
+
+.cart-item {
+    background: rgba(44, 36, 27, 0.04);
+    border-radius: 8px;
+    padding: 15px !important;
+    margin-bottom: 12px;
+    border: 1px solid rgba(44, 36, 27, 0.15) !important;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.cart-item:hover {
+    background: rgba(44, 36, 27, 0.08);
+    transform: translateX(-5px);
+    border-color: rgba(44, 36, 27, 0.3) !important;
+}
+
+.cart-item strong {
+    color: var(--text-dark);
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.cart-item small {
+    color: var(--accent-crimson);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.btn-archival-cancel {
+    background: transparent;
+    border: 1px solid var(--accent-crimson);
+    color: var(--accent-crimson);
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-archival-cancel:hover {
+    background: var(--accent-crimson);
+    color: var(--bg-parchment);
+    box-shadow: 0 0 10px rgba(107, 45, 40, 0.3);
+}
+
+/* Fix close button contrast on parchment */
+#cartPanel .btn-close {
+    filter: sepia(1) saturate(5) hue-rotate(-20deg) brightness(0.2);
+    opacity: 0.7;
+}
+
+#cartPanel .btn-close:hover {
+    opacity: 1;
+}
+
