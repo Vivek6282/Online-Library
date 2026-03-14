@@ -2887,19 +2887,30 @@ main.container {
 }
 
 .btn-archival-cancel {
-    background: transparent;
-    border: 1px solid var(--accent-crimson);
-    color: var(--accent-crimson);
+    background: rgba(139, 0, 0, 0.05);
+    border: 1px solid #8b0000;
+    color: #8b0000;
     font-family: var(--font-heading);
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    transition: all 0.3s ease;
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 700;
+    margin-left: 10px;
 }
 
 .btn-archival-cancel:hover {
-    background: var(--accent-crimson);
+    background: #b22222; /* Vivid Firebrick red */
+    border-color: #b22222;
     color: var(--bg-parchment);
-    box-shadow: 0 0 10px rgba(107, 45, 40, 0.3);
+    box-shadow: 0 5px 15px rgba(178, 34, 34, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-archival-cancel:active {
+    transform: translateY(0);
 }
 
 /* Fix close button contrast on parchment */
